@@ -10,7 +10,6 @@ define('DB_NAME', getenv('POSTGRES_DATABASE'));
 define('DB_USER', getenv('POSTGRES_USER'));
 define('DB_PASS', getenv('POSTGRES_PASSWORD')); 
 define('DB_PORT', getenv('POSTGRES_PORT') ?: '5432');
-// set your DB password
 
 // Path where uploaded/generated assets live (web-accessible)
 define('UPLOAD_DIR', __DIR__ . '/assets/uploads/');
