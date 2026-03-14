@@ -6,11 +6,11 @@ header('Content-Type: application/json');
 
 
 
-require_once __DIR__ . 'config.php';
+require_once __DIR__ . 'public/config.php';
 
-require_once __DIR__ . 'includes/db_connect.php';
+require_once __DIR__ . 'public/includes/db_connect.php';
 
-require_once __DIR__ . 'includes/chat_history.php';
+require_once __DIR__ . 'public/includes/chat_history.php';
 
 
 
