@@ -1,0 +1,387 @@
+* {
+  --sidebar-bgcolor: rgba(87, 175, 36, 0.87);
+  margin: 0px;
+}
+
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #f9fafb;
+  display: flex;
+  overflow: scroll;
+  height: 100vmin;
+}
+
+.app-container {
+  display: flex;
+  width: 100%;
+  margin-left: 3px;
+}
+
+.sidebar {
+  left: 0px;
+  top: 0px;
+  bottom: 0px;
+  width: 260px;
+  background: var(--sidebar-bgcolor);
+  border-right: 1px solid #e5e5e5;
+  height: 100vh;
+  overflow: hidden;
+  overflow-y: auto;
+  transition: transform 0.3s ease;
+  justify-content: center;
+}
+
+#menu {
+  display: none;
+  position: fixed;
+  top: 5px;
+  right: 5px;
+  z-index: 1100;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  opacity: 75%;
+}
+
+#menu:hover {
+  opacity: 100%;
+}
+
+#menu:active {
+  scale: 1.5;
+}
+
+@media (max-width: 550px) {
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    transform: translateX(-100%);
+    z-index: 1000;
+  }
+
+  .sidebar.open {
+    width: 40%;
+    transform: translateX(2%);
+  }
+
+  #menu {
+    display: block;
+  }
+
+
+}
+
+.sidebar-header {
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.2rem;
+  font-weight: bold;
+  font-family: cursive;
+  padding: 10px;
+}
+
+.history-list {
+  list-style: none;
+  margin-top: 1rem;
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+.sidebar-footer {
+  padding: 10px;
+  border-top: solid snow;
+  font-family: cursive;
+  text-align: center;
+}
+
+.sidebar button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  transition: background 0.2s;
+}
+
+#new-chat-btn {
+  text-align: center;
+  box-shadow: 0px 0px 10px peru;
+  border-radius: 10px;
+  margin: 15px;
+  background: linear-gradient(120deg, rgb(252, 225, 121), rgb(235, 179, 235));
+}
+
+.history-list {
+  flex: 1;
+  overflow: auto;
+  padding: 8px 4px;
+  margin: 0;
+  list-style: none;
+}
+
+.history-list li {
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  color: var(--muted);
+  cursor: pointer;
+  background: transparent;
+  opacity: 75%;
+  transition: all 0.15s;
+}
+
+.history-list li:hover {
+  opacity: 100%;
+  color: black;
+}
+
+.icon-button {
+  background: none;
+  border: none;
+  padding: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.icon-button img {
+  width: 20px;
+  height: 20px;
+  opacity: 0.7;
+}
+
+.icon-button:hover img {
+  opacity: 1;
+}
+
+.chat-area {
+  width: 80%;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem;
+  padding-bottom: 10%;
+  overflow: hidden;
+}
+
+.ai-header h1 {
+  font-size: 2rem;
+  margin-bottom: 0.25rem;
+  color: #45f890;
+}
+
+.ai-header p {
+  color: #6b7280;
+  margin-bottom: 1rem;
+}
+
+.chat-box {
+  flex: 1;
+  padding: 20px;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.message {
+  max-width: 75%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  line-height: 1.4;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+.input-wrapper {
+  width: 80%;
+  max-width: 900px;
+  background: #fff;
+  border: 1px solid #d1d5db;
+  padding: 15px;
+  border-radius: 28px;
+  position: absolute;
+  right: 10%;
+  bottom: 10px;
+  gap: 12px;
+  box-shadow:
+    outset 0 0 3px rgba(0,0,0,0.05),
+    0 2px 6px rgba(0,0,0,0.08);
+    overflow: hidden;
+}
+
+.input-wrapper input[type="file"] {
+  display: none;
+}
+
+form {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: row;
+}
+
+#user-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  resize: none;
+  font-size: 15px;
+  line-height: 20px;
+  padding-top: 4px;
+  min-height: 42px;
+  max-height: 50vh;
+  overflow-y: scroll;
+}
+
+.bot {
+  background: sienna;
+  align-self: flex-start;
+  color: #dbeeff;
+}
+
+.user {
+  background: gainsboro;
+  align-self: flex-end;
+}
+
+.chat-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  color: var(--muted);
+  background: transparent;
+  transition: all 0.15s;
+}
+
+.chat-item:hover {
+  background: rgba(255,255,255,0.03);
+  color: #fff;
+}
+
+.chat-title {
+  flex: 1;
+  cursor: pointer;
+}
+
+.delete-btn {
+  background: none;
+  border: none;
+  padding-left: 12px;
+  cursor: pointer;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  transition: color 0.2s;
+}
+
+.delete-btn svg {
+  pointer-events: none;
+}
+
+.chat-item.active {
+  background-color: #e0f2fe;
+  font-weight: bold;
+}
+
+/* The box around the code */
+.code-container {
+    border-radius: 10px;
+    margin: 15px 0;
+    overflow: scroll;
+    border: 2px solid sienna;
+}
+
+/* The bar at the top of the code box */
+.code-header {
+    background: sienna;
+    padding: 8px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #333;
+}
+
+.code-lang {
+    color:  #fff;
+    font-size: 12px;
+    text-transform: uppercase;
+    font-family: monospace;
+}
+
+/* The Copy Button */
+.copy-btn {
+    background: transparent;
+    border: 1px solid var(--sidebar-bgcolor);
+    cursor: pointer;
+    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: 0.2s;
+}
+
+.copy-btn:hover {
+    color: #fff;
+}
+
+/* Ensure the code itself is readable */
+.code-container pre {
+    margin: 0 !important;
+    padding: 15px !important;
+    background: transparent !important;
+    overflow-x: auto;
+}
+
+.code-container code {
+    font-family: 'Fira Code', 'Courier New', monospace;
+    font-size: 14px;
+}
+
+/* --- STOP SPEECH BUTTON --- */
+.stop-speech-btn {
+    position: absolute;
+    bottom: 110px; /* Positioned above the input bar */
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(239, 68, 68, 0.9); /* Reddish color */
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 100;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    transition: opacity 0.3s ease;
+}
+
+.stop-speech-btn:hover {
+    background: rgb(220, 38, 38);
+}
+
+.stop-speech-btn img {
+    filter: brightness(0) invert(1); /* Makes icon white */
+}
+
+.pulse {
+    animation: pulse-red 1.5s infinite;
+}
+
+@keyframes pulse-red {
+    0% { transform: scale(1); filter: drop-shadow(0 0 10px dodgerblue); }
+    70% { transform: scale(1.05); filter: drop-shadow(0 0 10px rgb(128, 30, 255)); }
+    100% { transform: scale(1); filter: drop-shadow(0 0 10px rgb(255, 30, 244));  }
+}
