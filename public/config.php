@@ -3,10 +3,14 @@
 // IMPORTANT: do NOT commit this file with a real API key to public repos.
 
 define('OPENAI_API_KEY', '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');
-define('DB_HOST', 'sql308.infinityfree.com');
-define('DB_NAME', 'if0_41381496_luntian_ai');
-define('DB_USER', 'if0_41381496');
-define('DB_PASS', '102006Pmpn1'); // set your DB password
+
+// Use Environment Variables for security
+define('DB_HOST', getenv('POSTGRES_HOST'));
+define('DB_NAME', getenv('POSTGRES_DATABASE'));
+define('DB_USER', getenv('POSTGRES_USER'));
+define('DB_PASS', getenv('POSTGRES_PASSWORD')); 
+define('DB_PORT', getenv('POSTGRES_PORT') ?: '5432');
+// set your DB password
 
 // Path where uploaded/generated assets live (web-accessible)
 define('UPLOAD_DIR', __DIR__ . '/assets/uploads/');
