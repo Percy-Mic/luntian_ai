@@ -30,7 +30,7 @@
     </aside>
 
     <button id="menu">
-      <img src="assets/icons/menu-alt-02-svgrepo-com.svg" alt="menu" width="40px">
+      <img src="public/assets/icons/menu-alt-02-svgrepo-com.svg" alt="menu" width="40px">
     </button>
 
     <main class="chat-area">
@@ -52,11 +52,11 @@
           <textarea id="user-input" placeholder="Ask anything..."></textarea><!-- Textarea -->
         
           <button class="icon-button" id="mic-btn">
-            <img src="assets/icons/mic-svgrepo-com.svg" alt="open mic"/>
+            <img src="public/assets/icons/mic-svgrepo-com.svg" alt="open mic"/>
           </button><!-- Mic -->
         
           <button class="icon-button" id="send-btn">
-            <img src="assets/icons/send-svgrepo-com.svg" alt="send">
+            <img src="public/assets/icons/send-svgrepo-com.svg" alt="send">
           </button><!-- Send -->
         </form>
       </div>
