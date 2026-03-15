@@ -1,28 +1,15 @@
 <?php
-
 // api/chat.php
-
 header('Content-Type: application/json');
 
-
-
-require_once __DIR__ . 'public/config.php';
-
-require_once __DIR__ . 'public/includes/db_connect.php';
-
-require_once __DIR__ . 'public/includes/chat_history.php';
-
-
+require_once __DIR__ . 'config.php';
+require_once __DIR__ . 'db_connect.php';
+require_once __DIR__ . 'chat_history.php';
 
 // Parse Input
-
 $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
-
 $prompt = $input['prompt'] ?? ($input['message'] ?? '');
-
 $conversation_id = isset($input['conversation_id']) ? intval($input['conversation_id']) : null;
-
-
 
 if (!$conversation_id) {
 
