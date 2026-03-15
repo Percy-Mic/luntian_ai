@@ -1,6 +1,6 @@
 <?php
-// includes/chat_history.php
-require_once _DIR_ . '/db_connect.php'; // Added a missing slash here
+// chat_history.php
+require_once _DIR_ . 'db_connect.php'; // Added a missing slash here
 
 // Get messages for conversation
 function get_messages_for_conversation($conversation_id) {
