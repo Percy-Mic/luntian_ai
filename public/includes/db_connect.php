@@ -2,10 +2,11 @@
 // includes/db_connect.php
 require_once __DIR__ . '/../config.php';
 
-$mysqli = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
-if ($mysqli->connect_errno) {
-    http_response_code(500);
-    echo json_encode(['error' => 'DB connect error: ' . $mysqli->connect_error]);
-    exit;
+try {
+    $dsn = "pgsql:host=" . DB_HOST . ";port=" . DB_PORT . ";dbname=" . DB_NAME . ";sslmode=require";
+    $pdo = new PDO($dsn, DB_USER, DB_PASS, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+    // Connection successful!
+} catch (PDOException $e) {
+    error_log("Connection failed: " . $e->getMessage());
+    die("Database error. Please try again later.");
 }
-$mysqli->set_charset('utf8mb4');
