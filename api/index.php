@@ -1,11 +1,11 @@
-<?php require_once __DIR__ . '/config.php'; ?>
+<?php require_once __DIR__ . 'config.php'; ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Luntian Assistant</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="/../style.css" />
   <script src="marked.min.js"></script>
 </head>
 
@@ -30,7 +30,7 @@
     </aside>
 
     <button id="menu">
-      <img src="public/assets/icons/menu-alt-02-svgrepo-com.svg" alt="menu" width="40px">
+      <img src="/../menu-alt-02-svgrepo-com.svg" alt="menu" width="40px">
     </button>
 
     <main class="chat-area">
@@ -52,11 +52,11 @@
           <textarea id="user-input" placeholder="Ask anything..."></textarea><!-- Textarea -->
         
           <button class="icon-button" id="mic-btn">
-            <img src="public/assets/icons/mic-svgrepo-com.svg" alt="open mic"/>
+            <img src="/../mic-svgrepo-com.svg" alt="open mic"/>
           </button><!-- Mic -->
         
           <button class="icon-button" id="send-btn">
-            <img src="public/assets/icons/send-svgrepo-com.svg" alt="send">
+            <img src="/../send-svgrepo-com.svg" alt="send">
           </button><!-- Send -->
         </form>
       </div>
