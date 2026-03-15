@@ -1,51 +1,43 @@
 <?php
 // includes/chat_history.php
-require_once __DIR__ . '/db_connect.php';
+require_once _DIR_ . '/db_connect.php'; // Added a missing slash here
 
-// get messages for conversation (returns array of ['role'=>'user'|'assistant','content'=>...])
+// Get messages for conversation
 function get_messages_for_conversation($conversation_id) {
-    global $mysqli;
-    $stmt = $mysqli->prepare("SELECT role, content, content_type, extra FROM messages WHERE conversation_id = ? ORDER BY id ASC");
-    $stmt->bind_param('i', $conversation_id);
-    $stmt->execute();
-    $res = $stmt->get_result();
-    $out = [];
-    while ($row = $res->fetch_assoc()) {
-        $extra = $row['extra'] ? json_decode($row['extra'], true) : null;
-        $out[] = [
-            'role' => $row['role'],
-            'content' => $row['content'],
-            'content_type' => $row['content_type'],
-            'extra' => $extra
-        ];
-    }
-    return $out;
+    global $pdo; // Use $pdo from your new db_connect.php
+    
+    // We used 'message_text' in our DBeaver script, so we use it here
+    $stmt = $pdo->prepare("SELECT role, message_text as content FROM messages WHERE conversation_id = ? ORDER BY id ASC");
+    $stmt->execute([$conversation_id]);
+    
+    return $stmt->fetchAll();
 }
 
-function add_message($conversation_id, $role, $content, $content_type = 'text', $extra = null) {
-    global $mysqli;
-    $jsonExtra = $extra ? json_encode($extra, JSON_UNESCAPED_UNICODE) : null;
-    $stmt = $mysqli->prepare("INSERT INTO messages (conversation_id, role, content, content_type, extra) VALUES (?, ?, ?, ?, ?)");
-    $stmt->bind_param('issss', $conversation_id, $role, $content, $content_type, $jsonExtra);
-    $stmt->execute();
-    return $mysqli->insert_id;
+// Add a message
+function add_message($conversation_id, $role, $content) {
+    global $pdo;
+    
+    $stmt = $pdo->prepare("INSERT INTO messages (conversation_id, role, message_text) VALUES (?, ?, ?)");
+    $stmt->execute([$conversation_id, $role, $content]);
+    
+    return $pdo->lastInsertId();
 }
 
-function create_conversation($user_id = 1, $title = 'New Chat') {
-    global $mysqli;
-    $stmt = $mysqli->prepare("INSERT INTO conversations (user_id, title) VALUES (?, ?)");
-    $stmt->bind_param('is', $user_id, $title);
-    $stmt->execute();
-    return $mysqli->insert_id;
+// Create a conversation
+function create_conversation($title = 'New Chat') {
+    global $pdo;
+    
+    // Note: We didn't include a 'user_id' column in our initial Postgres script
+    $stmt = $pdo->prepare("INSERT INTO conversations (title) VALUES (?)");
+    $stmt->execute([$title]);
+    
+    return $pdo->lastInsertId();
 }
 
-function list_conversations($user_id = 1) {
-    global $mysqli;
-    $stmt = $mysqli->prepare("SELECT id, title, created_at FROM conversations WHERE user_id = ? ORDER BY created_at DESC");
-    $stmt->bind_param('i', $user_id);
-    $stmt->execute();
-    $res = $stmt->get_result();
-    $out = [];
-    while ($row = $res->fetch_assoc()) $out[] = $row;
-    return $out;
+// List all conversations
+function list_conversations() {
+    global $pdo;
+    
+    $stmt = $pdo->query("SELECT id, title, created_at FROM conversations ORDER BY created_at DESC");
+    return $stmt->fetchAll();
 }
