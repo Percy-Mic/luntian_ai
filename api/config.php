@@ -11,7 +11,7 @@ define('DB_PASS', getenv('POSTGRES_PASSWORD'));
 define('DB_PORT', getenv('POSTGRES_PORT') ?: '18500');
 
 // Path where uploaded/generated assets live (web-accessible)
-define('UPLOAD_DIR', _DIR_ . '/assets/uploads/');
+define('UPLOAD_DIR', __DIR__ . '/assets/uploads/');
 define('UPLOAD_URL', '/assets/uploads/');
 
 // Create uploads dir if missing (Important for image generation storage)
