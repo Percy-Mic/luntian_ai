@@ -1,7 +1,4 @@
-<?php
-require_once __DIR__ . '/config.php';
-require_once __DIR__ . '/db_connect.php';
-?>
+<?php require_once __DIR__ . '/config.php'; ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -70,4 +67,5 @@ require_once __DIR__ . '/db_connect.php';
   <script src="app.js"></script>
 </body>
 </html>
+
 
