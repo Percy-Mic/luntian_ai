@@ -2,11 +2,14 @@
 // includes/db_connect.php
 require_once __DIR__ . '/config.php';
 
+// Use the full string from Aiven: postgresql://user:pass@host:port/dbname?sslmode=require
+$dsn = getenv('DATABASE_URL'); 
+
 try {
-    // Replace this with your actual Service URI from Aiven
-    $service_uri = getenv('DATABASE_URL'); 
-    $pdo = new PDO($service_uri);
+    $pdo = new PDO($dsn);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (PDOException $e) {
-    echo "Connection error: " . $e->getMessage();
+    // This will now show up in your Vercel Logs
+    error_log("Connection failed: " . $e->getMessage());
+    exit;
 }
-?>
