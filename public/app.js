@@ -128,7 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
         showTyping(true);
 
         try {
-            const res = await fetch('/api/aiResponse.php', {
+            const res = await fetch('/api/aiResponse', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: "include",
@@ -264,4 +264,5 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 });
+
 
