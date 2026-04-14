@@ -3,11 +3,10 @@
 require_once __DIR__ . '/config.php';
 
 try {
-    $dsn = "pgsql:host=" . DB_HOST . ";port=" . DB_PORT . ";dbname=" . DB_NAME . ";sslmode=require";
-    $pdo = new PDO($dsn, DB_USER, DB_PASS, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
-    // Connection successful!
+    // Replace this with your actual Service URI from Aiven
+    $service_uri = getenv('DATABASE_URL'); 
+    $pdo = new PDO($service_uri);
 } catch (PDOException $e) {
-    error_log("Connection failed: " . $e->getMessage());
-    // CHANGE THIS TEMPORARILY:
-    die("Debug Error: " . $e->getMessage()); 
+    echo "Connection error: " . $e->getMessage();
 }
+?>
