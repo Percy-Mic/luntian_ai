@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
             li.innerHTML = `
                 <span class="chat-title" title="Double-click to rename">${chat.title}</span>
                 <button class="delete-btn" data-index="${i}">
-                    <img src="public/assets/icons/delete-svgrepo-com.svg" width="20px">
+                    <img src="/assets/icons/delete-svgrepo-com.svg" width="20px">
                 </button>
             `;
             const titleSpan = li.querySelector('.chat-title');
@@ -264,3 +264,4 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 });
+
