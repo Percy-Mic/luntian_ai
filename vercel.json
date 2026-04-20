@@ -2,10 +2,7 @@
   "version": 2,
   "functions": {
     "api/*.php": {
-      "runtime": "vercel-php@0.7.3",
-      "config": {
-        "includeFiles": ["api/config.php", "api/db_connect.php"]
-      }
+      "runtime": "vercel-php@0.6.0"
     }
   },
   "routes": [
