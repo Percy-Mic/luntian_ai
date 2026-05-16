@@ -48,7 +48,7 @@ body {
 }
 
 #menu:active {
-  transform: scale(1.2);
+  scale: 1.5;
 }
 
 .sidebar-header {
@@ -379,30 +379,30 @@ form {
   }
 
   .sidebar.open {
-    width: 70%; /* more natural width on mobile */
-    transform: translateX(0);
+    width: 50%;
+    transform: translateX(2%);
   }
 
   #menu {
     display: block;
   }
 
-  section {
-    width: 100%;          /* full width on mobile */
-    height: auto;         /* let content define height */
-    min-height: 100vh;    /* ensure it fills viewport */
-    padding: 10px;        /* consistent spacing */
-    margin: 0;            /* remove extra margin */
-    background: transparent; /* remove debug red */
+  .chat-box {
+    height: 60vh;       /* fills 60% of viewport height */
+    max-height: 70vh;   /* prevents it from growing too tall */
+    min-height: 40vh;   /* ensures enough space for messages */
+    overflow-y: auto;   /* scrollable if content exceeds */
+    padding: 10px;      /* tighter padding for mobile */
   }
-  
+
   .input-wrapper {
-    margin-top: 0;
-    width: 95%;           /* fit nicely on mobile */
+    width: 95%;
     right: 2.5%;
+    bottom: 8px;
   }
 
   form {
-    height: auto;         /* fixed invalid '0% auto' */
+    height: auto;
   }
+
 }
