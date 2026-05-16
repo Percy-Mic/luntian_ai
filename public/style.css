@@ -8,7 +8,6 @@ body {
   background-color: #f9fafb;
   display: flex;
   height: 100%;
-  overflow: hidden;
 }
 
 .app-container {
