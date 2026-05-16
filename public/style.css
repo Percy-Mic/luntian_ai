@@ -50,6 +50,27 @@ body {
   scale: 1.1;
 }
 
+@media (max-width: 550px) {
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    transform: translateX(-100%);
+    z-index: 1000;
+  }
+
+  .sidebar.open {
+    width: 50%;
+    transform: translateX(2%);
+  }
+
+  #menu {
+    display: block;
+  }
+
+
+}
+
 .sidebar-header {
   padding: 20px;
   display: flex;
@@ -188,7 +209,7 @@ body {
   border: 1px solid #d1d5db;
   padding: 15px;
   border-radius: 28px;
-  position: absolute;
+  position: fixed;
   right: 10%;
   bottom: 10px;
   gap: 12px;
@@ -331,7 +352,7 @@ form {
 
 /* --- STOP SPEECH BUTTON --- */
 .stop-speech-btn {
-    position: absolute;
+    position: fixed;
     bottom: 110px; /* Positioned above the input bar */
     left: 50%;
     transform: translateX(-50%);
@@ -366,25 +387,4 @@ form {
     0% { transform: scale(1); filter: drop-shadow(0 0 10px dodgerblue); }
     70% { transform: scale(1.05); filter: drop-shadow(0 0 10px rgb(128, 30, 255)); }
     100% { transform: scale(1); filter: drop-shadow(0 0 10px rgb(255, 30, 244));  }
-}
-
-@media (max-width: 550px) {
-  .sidebar {
-    position: fixed;
-    left: 0;
-    top: 0;
-    transform: translateX(-100%);
-    z-index: 1000;
-  }
-
-  .sidebar.open {
-    width: 50%;
-    transform: translateX(2%);
-  }
-
-  #menu {
-    display: block;
-  }
-
-
 }
