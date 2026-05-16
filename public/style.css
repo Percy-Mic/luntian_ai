@@ -371,15 +371,15 @@ form {
 
 @media only screen and (max-width: 550px) {
   .chat-box {
-    height: 60%;       /* responsive height */
-    min-height: 400px;  /* ensures usable space */
+    height: 100%;       /* responsive height */
+    min-height: 1000px;  /* ensures usable space */
     overflow-y: auto;   /* scroll if content exceeds */
     padding: 10px;      /* tighter spacing for mobile */
     background: pink;
   }
 
   main {
-    height: 80%;
+    height: 100%;
     padding-bottom: 40px;
     background: blue;
     margin-bottom: 45px;
@@ -411,7 +411,7 @@ form {
   }
   
   .input-wrapper {
-    backround: sienna;
+    backrgound: sienna;
   }
 
 }
