@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Luntian Assistant</title>
-  <link rel="stylesheet" href="/../style.css" />
+  <link rel="stylesheet" href="style.css" />
   <script src="marked.min.js"></script>
 </head>
 
@@ -14,7 +14,7 @@
     <aside class="sidebar"><!--The sidebar-->
       <div class="sidebar-header"><!--The side bar header-->
         <div class="brand">
-          <svg width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#e9530eff"/><circle cx="12" cy="12" r="5" fill="#fff"/></svg>
+          <svg width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="yellowgreen"/><circle cx="12" cy="12" r="5" fill="sienna"/></svg>
           <span>Luntian AI</span>
         </div>
       </div>
@@ -30,7 +30,7 @@
     </aside>
 
     <button id="menu">
-      <img src="/assets/icons/menu-alt-02-svgrepo-com.svg" alt="menu" width="40px">
+      <img src="assets/icons/menu-alt-02-svgrepo-com.svg" alt="menu" width="40px">
     </button>
 
     <main class="chat-area">
@@ -52,11 +52,11 @@
           <textarea id="user-input" placeholder="Ask anything..."></textarea><!-- Textarea -->
         
           <button class="icon-button" id="mic-btn">
-            <img src="/assets/icons/mic-svgrepo-com.svg" alt="open mic"/>
+            <img src="assets/icons/mic-svgrepo-com.svg" alt="open mic"/>
           </button><!-- Mic -->
         
           <button class="icon-button" id="send-btn">
-            <img src="/assets/icons/send-svgrepo-com.svg" alt="send">
+            <img src="assets/icons/send-svgrepo-com.svg" alt="send">
           </button><!-- Send -->
         </form>
       </div>
@@ -67,6 +67,3 @@
   <script src="app.js"></script>
 </body>
 </html>
-
-
-
