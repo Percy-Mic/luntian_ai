@@ -2,9 +2,9 @@
 // api/chat.php
 header('Content-Type: application/json');
 
-require_once __DIR__ . 'config.php';
-require_once __DIR__ . 'db_connect.php';
-require_once __DIR__ . 'chat_history.php';
+require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/db_connect.php';
+require_once __DIR__ . '/chat_history.php';
 
 // Parse Input
 $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
@@ -13,13 +13,13 @@ $conversation_id = isset($input['conversation_id']) ? intval($input['conversatio
 
 if (!$conversation_id) {
 
-    $conversation_id = create_conversation(1, 'Chat via web');
+    $conversation_id = create_conversation('Chat via web');
 
 }
 
 
 
-add_message($conversation_id, 'user', $prompt, 'text');
+add_message($conversation_id, 'user', $prompt);
 
 
 
@@ -151,7 +151,7 @@ $assistant_text = $res['choices'][0]['message']['content'] ?? 'No response.';
 
 
 
-add_message($conversation_id, 'assistant', $assistant_text, 'text', $res);
+add_message($conversation_id, 'assistant', $assistant_text);
 
 
 
