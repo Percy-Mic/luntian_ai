@@ -369,7 +369,7 @@ form {
     100% { transform: scale(1); filter: drop-shadow(0 0 10px rgb(255, 30, 244));  }
 }
 
-@media only screen and (max-width: 550px) {
+@media only screen and (max-width: 350px) {
   .chat-box {
     height: 100%;       /* responsive height */
     min-height: 1000px;  /* ensures usable space */
