@@ -8,7 +8,7 @@ body {
   background-color: #f9fafb;
   display: flex;
   overflow: scroll;
-  height: 100vmin;
+  height: 100%;
 }
 
 .app-container {
@@ -372,7 +372,7 @@ form {
 @media only screen and (max-width: 350px) {
   .chat-box {
     height: 100%;       /* responsive height */
-    min-height: 1000px;  /* ensures usable space */
+    min-height: 400px;  /* ensures usable space */
     overflow-y: auto;   /* scroll if content exceeds */
     padding: 10px;      /* tighter spacing for mobile */
     background: pink;
@@ -411,7 +411,7 @@ form {
   }
   
   .input-wrapper {
-    backrgound: sienna;
+    background: sienna;
   }
 
 }
