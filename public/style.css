@@ -382,6 +382,11 @@ form {
     height: 80%;
     padding-bottom: 40px;
     background: blue;
+    margin-bottom: 45px;
+  }
+
+  body {
+    padding-bottom: 0px;
   }
 
   .sidebar {
