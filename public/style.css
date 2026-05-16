@@ -17,7 +17,8 @@ body {
 }
 
 .sidebar {
-  left: 0px;
+  position: fixed;
+  left: 2px;
   top: 0px;
   bottom: 0px;
   width: 260px;
@@ -60,7 +61,7 @@ body {
   }
 
   .sidebar.open {
-    width: 50%;
+    width: 60%;
     transform: translateX(2%);
   }
 
@@ -188,6 +189,7 @@ body {
 .chat-box {
   flex: 1;
   padding: 20px;
+  padding-bottom: 50px;
   overflow: auto;
   display: flex;
   flex-direction: column;
