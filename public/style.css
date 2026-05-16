@@ -80,6 +80,9 @@ body {
     margin-top: 0px;
   }
 
+  form {
+    height: 0% auto;
+  }
 
 }
 
