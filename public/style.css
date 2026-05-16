@@ -70,7 +70,9 @@ body {
   }
 
   #chat-box {
-    min-height: 350px;
+    padding-bottom: 10px;
+    margin-bottom: auto;
+    min-height: 300px;
   }
 
 
