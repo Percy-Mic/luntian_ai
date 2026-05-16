@@ -7,7 +7,6 @@ body {
   font-family: 'Segoe UI', sans-serif;
   background-color: #f9fafb;
   display: flex;
-  overflow: scroll;
   height: 100%;
 }
 
@@ -369,26 +368,8 @@ form {
     100% { transform: scale(1); filter: drop-shadow(0 0 10px rgb(255, 30, 244));  }
 }
 
-@media only screen and (max-width: 350px) {
-  .chat-box {
-    height: 100%;       /* responsive height */
-    min-height: 400px;  /* ensures usable space */
-    overflow-y: auto;   /* scroll if content exceeds */
-    padding: 10px;      /* tighter spacing for mobile */
-    background: pink;
-  }
-
-  main {
-    height: 100%;
-    padding-bottom: 40px;
-    background: blue;
-    margin-bottom: 45px;
-  }
-
-  body {
-    padding-bottom: 0px;
-  }
-
+@media only screen and (max-width: 550px) {
+  
   .sidebar {
     position: fixed;
     left: 0;
@@ -404,14 +385,6 @@ form {
 
   #menu {
     display: block;
-  }
-
-  form{
-    background: purple;
-  }
-  
-  .input-wrapper {
-    background: sienna;
   }
 
 }
