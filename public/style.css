@@ -48,7 +48,7 @@ body {
 }
 
 #menu:active {
-  scale: 1.5;
+  transform: scale(1.2);
 }
 
 .sidebar-header {
@@ -379,8 +379,8 @@ form {
   }
 
   .sidebar.open {
-    width: 50%;
-    transform: translateX(2%);
+    width: 70%; /* more natural width on mobile */
+    transform: translateX(0);
   }
 
   #menu {
@@ -388,19 +388,21 @@ form {
   }
 
   section {
-    height: 100%;
-    padding-bottom: 10px;
-    margin-bottom: 10px;
-    min-height: 400px;
-    background: red;
+    width: 100%;          /* full width on mobile */
+    height: auto;         /* let content define height */
+    min-height: 100vh;    /* ensure it fills viewport */
+    padding: 10px;        /* consistent spacing */
+    margin: 0;            /* remove extra margin */
+    background: transparent; /* remove debug red */
   }
   
   .input-wrapper {
-    margin-top: 0px;
+    margin-top: 0;
+    width: 95%;           /* fit nicely on mobile */
+    right: 2.5%;
   }
 
   form {
-    height: 0% auto;
+    height: auto;         /* fixed invalid '0% auto' */
   }
-
 }
