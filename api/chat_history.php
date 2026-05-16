@@ -1,23 +1,30 @@
 <?php
 // chat_history.php
-require_once _DIR_ . 'db_connect.php'; // Added a missing slash here
+require_once __DIR__ . '/db_connect.php'; // Corrected __DIR__ usage and added slash
 
-// Get messages for conversation
+// Get messages for a conversation
 function get_messages_for_conversation($conversation_id) {
-    global $pdo; // Use $pdo from your new db_connect.php
+    global $pdo; // Use $pdo from db_connect.php
     
-    // We used 'message_text' in our DBeaver script, so we use it here
-    $stmt = $pdo->prepare("SELECT role, message_text as content FROM messages WHERE conversation_id = ? ORDER BY id ASC");
+    $stmt = $pdo->prepare("
+        SELECT role, message_text AS content 
+        FROM messages 
+        WHERE conversation_id = ? 
+        ORDER BY id ASC
+    ");
     $stmt->execute([$conversation_id]);
     
-    return $stmt->fetchAll();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
 // Add a message
 function add_message($conversation_id, $role, $content) {
     global $pdo;
     
-    $stmt = $pdo->prepare("INSERT INTO messages (conversation_id, role, message_text) VALUES (?, ?, ?)");
+    $stmt = $pdo->prepare("
+        INSERT INTO messages (conversation_id, role, message_text) 
+        VALUES (?, ?, ?)
+    ");
     $stmt->execute([$conversation_id, $role, $content]);
     
     return $pdo->lastInsertId();
@@ -27,8 +34,10 @@ function add_message($conversation_id, $role, $content) {
 function create_conversation($title = 'New Chat') {
     global $pdo;
     
-    // Note: We didn't include a 'user_id' column in our initial Postgres script
-    $stmt = $pdo->prepare("INSERT INTO conversations (title) VALUES (?)");
+    $stmt = $pdo->prepare("
+        INSERT INTO conversations (title) 
+        VALUES (?)
+    ");
     $stmt->execute([$title]);
     
     return $pdo->lastInsertId();
@@ -38,6 +47,11 @@ function create_conversation($title = 'New Chat') {
 function list_conversations() {
     global $pdo;
     
-    $stmt = $pdo->query("SELECT id, title, created_at FROM conversations ORDER BY created_at DESC");
-    return $stmt->fetchAll();
+    $stmt = $pdo->query("
+        SELECT id, title, created_at 
+        FROM conversations 
+        ORDER BY created_at DESC
+    ");
+    
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
