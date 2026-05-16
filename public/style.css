@@ -7,14 +7,13 @@ body {
   font-family: 'Segoe UI', sans-serif;
   background-color: #f9fafb;
   display: flex;
-  height: 100%;
+  overflow: scroll;
 }
 
 .app-container {
   display: flex;
   width: 100%;
   margin-left: 3px;
-  overflow: scroll;
 }
 
 .sidebar {
@@ -24,7 +23,7 @@ body {
   width: 260px;
   background: var(--sidebar-bgcolor);
   border-right: 1px solid #e5e5e5;
-  height: 100vh;
+  height: 100%;
   overflow: hidden;
   overflow-y: auto;
   transition: transform 0.3s ease;
@@ -48,7 +47,7 @@ body {
 }
 
 #menu:active {
-  scale: 1.5;
+  scale: 1.1;
 }
 
 .sidebar-header {
@@ -150,7 +149,7 @@ body {
   flex-direction: column;
   padding: 1.5rem;
   padding-bottom: 10%;
-  overflow: scroll;
+  overflow: hidden;
 }
 
 .ai-header h1 {
@@ -167,7 +166,7 @@ body {
 .chat-box {
   flex: 1;
   padding: 20px;
-  overflow: scroll;
+  overflow: auto;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -369,8 +368,7 @@ form {
     100% { transform: scale(1); filter: drop-shadow(0 0 10px rgb(255, 30, 244));  }
 }
 
-@media only screen and (max-width: 550px) {
-  
+@media (max-width: 550px) {
   .sidebar {
     position: fixed;
     left: 0;
@@ -380,12 +378,13 @@ form {
   }
 
   .sidebar.open {
-    width: 70%;
-    transform: translateX(0);
+    width: 50%;
+    transform: translateX(2%);
   }
 
   #menu {
     display: block;
   }
+
 
 }
