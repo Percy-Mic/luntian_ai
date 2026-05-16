@@ -369,7 +369,15 @@ form {
     100% { transform: scale(1); filter: drop-shadow(0 0 10px rgb(255, 30, 244));  }
 }
 
-@media (max-width: 550px) {
+@media only screen and (max-width: 550px) {
+  .chat-box {
+    height: 60vh;       /* responsive height */
+    min-height: 300px;  /* ensures usable space */
+    max-height: 75vh;   /* prevents overflow */
+    overflow-y: auto;   /* scroll if content exceeds */
+    padding: 10px;      /* tighter spacing for mobile */
+  }
+
   .sidebar {
     position: fixed;
     left: 0;
@@ -379,20 +387,12 @@ form {
   }
 
   .sidebar.open {
-    width: 50%;
-    transform: translateX(2%);
+    width: 70%;
+    transform: translateX(0);
   }
 
   #menu {
     display: block;
-  }
-
-  .chat-box {
-    height: 60vh;       /* fills 60% of viewport height */
-    max-height: 70vh;   /* prevents it from growing too tall */
-    min-height: 40vh;   /* ensures enough space for messages */
-    overflow-y: auto;   /* scrollable if content exceeds */
-    padding: 10px;      /* tighter padding for mobile */
   }
 
   .input-wrapper {
@@ -402,7 +402,6 @@ form {
   }
 
   form {
-    height: auto;
+    height: auto; /* fixed invalid '0% auto' */
   }
-
 }
