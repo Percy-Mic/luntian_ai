@@ -375,10 +375,12 @@ form {
     min-height: 400px;  /* ensures usable space */
     overflow-y: auto;   /* scroll if content exceeds */
     padding: 10px;      /* tighter spacing for mobile */
+    background: pink;
   }
 
   main {
     padding-bottom: 40px;
+    background: blue;
   }
 
   .sidebar {
@@ -396,6 +398,10 @@ form {
 
   #menu {
     display: block;
+  }
+
+  form{
+    background: purple;
   }
 
 }
