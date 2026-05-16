@@ -379,6 +379,7 @@ form {
   }
 
   main {
+    height: 80%;
     padding-bottom: 40px;
     background: blue;
   }
