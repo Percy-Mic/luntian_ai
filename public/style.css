@@ -371,11 +371,14 @@ form {
 
 @media only screen and (max-width: 550px) {
   .chat-box {
-    height: 60vh;       /* responsive height */
-    min-height: 300px;  /* ensures usable space */
-    max-height: 75vh;   /* prevents overflow */
+    height: 60%;       /* responsive height */
+    min-height: 400px;  /* ensures usable space */
     overflow-y: auto;   /* scroll if content exceeds */
     padding: 10px;      /* tighter spacing for mobile */
+  }
+
+  main {
+    padding-bottom: 40px;
   }
 
   .sidebar {
@@ -395,13 +398,4 @@ form {
     display: block;
   }
 
-  .input-wrapper {
-    width: 95%;
-    right: 2.5%;
-    bottom: 8px;
-  }
-
-  form {
-    height: auto; /* fixed invalid '0% auto' */
-  }
 }
