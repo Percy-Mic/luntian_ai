@@ -1,0 +1,8 @@
+{
+  "name": "luntian-ai",
+  "version": "1.0.0",
+  "description": "Luntian AI Assistant",
+  "scripts": {
+    "build": "echo 'No build step required'"
+  }
+}
