@@ -1,5 +1,5 @@
 * {
-  --sidebar-bgcolor: rgba(87, 175, 36, 0.87);
+  --sidebar-bgcolor: sienna;
   margin: 0px;
 }
 
@@ -61,7 +61,7 @@ body {
   }
 
   .sidebar.open {
-    width: 40%;
+    width: 50%;
     transform: translateX(2%);
   }
 
@@ -114,8 +114,12 @@ body {
   text-align: center;
   box-shadow: 0px 0px 10px peru;
   border-radius: 10px;
-  margin: 15px;
-  background: linear-gradient(120deg, rgb(252, 225, 121), rgb(235, 179, 235));
+  padding: 10px;
+  background: rgb(235, 179, 235);
+  width: 90%;
+  margin-left: 50%;
+  transform: translate(-50%);
+  margin-bottom: 20px;
 }
 
 .history-list {
