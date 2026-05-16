@@ -170,7 +170,7 @@ body {
   flex-direction: column;
   padding: 1.5rem;
   padding-bottom: 10%;
-  overflow: hidden;
+  overflow: scroll;
 }
 
 .ai-header h1 {
