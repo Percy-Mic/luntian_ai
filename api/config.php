@@ -1,15 +1,35 @@
 <?php
-// config.php — Luntian AI Configuration
+// api/config.php - Luntian AI Production Configuration
 
-// Fetching Environment Variables from Vercel
-define('OPENAI_API_KEY', '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');
+// Check Vercel environment variables first; if not found, check defined constants
+if (!defined('OPENAI_API_KEY')) {
+    $env_key = getenv('OPENAI_API_KEY') ?: getenv('GROQ_API_KEY');
+    if ($env_key) {
+        define('OPENAI_API_KEY', $env_key);
+    }
+}
 
-define('DB_HOST', getenv('POSTGRES_HOST'));
-define('DB_NAME', getenv('POSTGRES_DATABASE'));
-define('DB_USER', getenv('POSTGRES_USER'));
-define('DB_PASS', getenv('POSTGRES_PASSWORD'));
-define('DB_PORT', getenv('POSTGRES_PORT') ?: '18500');
+// Media storage reference path specifications
+if (!defined('UPLOAD_DIR')) {
+    define('UPLOAD_DIR', __DIR__ . '/../public/assets/uploads/');
+}
+if (!defined('UPLOAD_URL')) {
+    define('UPLOAD_URL', '/assets/uploads/');
+}<?php
+// api/config.php - Luntian AI Production Configuration
 
-// Path where uploaded/generated assets live (web-accessible)
-define('UPLOAD_DIR', __DIR__ . '/assets/uploads/');
-define('UPLOAD_URL', '/assets/uploads/');
+// Check Vercel environment variables first; if not found, check defined constants
+if (!defined('OPENAI_API_KEY')) {
+    $env_key = getenv('OPENAI_API_KEY') ?: getenv('GROQ_API_KEY');
+    if ($env_key) {
+        define('OPENAI_API_KEY', $env_key);
+    }
+}
+
+// Media storage reference path specifications
+if (!defined('UPLOAD_DIR')) {
+    define('UPLOAD_DIR', __DIR__ . '/../public/assets/uploads/');
+}
+if (!defined('UPLOAD_URL')) {
+    define('UPLOAD_URL', '/assets/uploads/');
+}
