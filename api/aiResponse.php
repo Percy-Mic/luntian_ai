@@ -1,151 +1,125 @@
 <?php
 // api/aiResponse.php
 header('Content-Type: application/json');
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Headers: Content-Type, Authorization');
+header('Access-Control-Allow-Methods: POST, OPTIONS');
 
-// Ensure error tracking logs silently instead of outputting plain text
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    exit(0);
+}
+
 ini_set('display_errors', 0);
 error_reporting(E_ALL);
 
 try {
-    // 1. Establish Core Framework Requirements
     require_once __DIR__ . '/_config.php';
     require_once __DIR__ . '/_db_connect.php';
     require_once __DIR__ . '/_chat_history.php';
 
-    // 2. Parse Input Securely
-    $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
+    // 1. Parse Inbound Body JSON Safely
+    $raw_input = file_get_contents('php://input');
+    $input = json_decode($raw_input, true) ?? $_POST;
+    
     $prompt = $input['prompt'] ?? ($input['message'] ?? '');
     $conversation_id = isset($input['conversation_id']) ? $input['conversation_id'] : null;
 
-    // Filter out temporary client-side IDs from localStorage
-    if (!$conversation_id || strpos($conversation_id, 'temp-') === 0) {
-        $conversation_id = create_conversation('Chat via web');
+    if (empty($prompt)) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Prompt text string cannot be empty.']);
+        exit;
+    }
+
+    // 2. Validate/Create Conversation Thread safely
+    if (!$conversation_id || strpos($conversation_id, 'temp-') === 0 || $conversation_id === 'null') {
+        $conversation_id = create_conversation('Luntian Chat Thread');
+        if (!$conversation_id) {
+            throw new Exception("Database failed to initialize a new conversation ID row.");
+        }
     } else {
         $conversation_id = intval($conversation_id);
     }
 
-    if (empty($prompt)) {
-        http_response_code(400);
-        echo json_encode(['error' => 'Prompt text field cannot be completely blank.']);
-        exit;
+    // 3. Log Inbound Prompt into Messages Table
+    $saved_user_msg = add_message($conversation_id, 'user', $prompt);
+    if (!$saved_user_msg) {
+        // Don't kill the app, just log it internally
+        error_log("Database warning: Could not write user prompt to table.");
     }
 
-    // 3. Document Inbound Message Context to Database
-    add_message($conversation_id, 'user', $prompt);
-
-    // 4. Structure Groq LLM Chat Array
-    $model_messages = [];
-    $model_messages[] = [
-        'role' => 'system',
-        'content' => "You are Luntian, a friendly assistant developed by Percy Mic. Be concise and helpful."
+    // 4. Construct AI System Message Array Stack
+    $model_messages = [
+        ['role' => 'system', 'content' => "You are Luntian AI, a helpful virtual assistant created by Percy Mic. Keep answers clean, conversational, and precise."]
     ];
 
-    // Build historical context safely matching schema layouts
+    // Load history matching table layout records
     $history = get_messages_for_conversation($conversation_id);
     if (is_array($history)) {
-        foreach ($history as $m) {
-            $text_content = $m['content'] ?? ($m['message_text'] ?? '');
-            if (!empty($text_content)) {
-                $model_messages[] = [
-                    'role' => $m['role'], 
-                    'content' => $text_content
-                ];
+        foreach ($history as $msg) {
+            $text = $msg['content'] ?? ($msg['message_text'] ?? '');
+            if (!empty($text)) {
+                $model_messages[] = ['role' => $msg['role'], 'content' => $text];
             }
         }
     }
 
-    // Ensure immediate current prompt is evaluated inside the context payload array
-    if (empty($model_messages) || end($model_messages)['content'] !== $prompt) {
+    // Double check that the current query is appended
+    if (end($model_messages)['content'] !== $prompt) {
         $model_messages[] = ['role' => 'user', 'content' => $prompt];
     }
 
-    // 5. Initialize Groq AI Endpoint Payload Processing
-    $url = "https://api.groq.com/openai/v1/chat/completions";
-    $data = [
-        "model" => "llama-3.3-70b-versatile",
-        "messages" => $model_messages
-    ];
-
-    // Securely pull API keys via custom environmental check structures
     $api_key = defined('OPENAI_API_KEY') ? OPENAI_API_KEY : null;
-
     if (empty($api_key)) {
-        // Trap empty keys before initiating cURL to prevent generic 500 server crashes
-        http_response_code(401);
-        echo json_encode([
-            'error' => 'Configuration Error',
-            'details' => 'Groq system access key token is missing or unresolved from host environment variables.'
-        ]);
-        exit;
+        throw new Exception("Groq system API token key is missing or undefined inside config constants.");
     }
 
-    $ch = curl_init($url);
+    // 5. Send Payload Package to Verified Groq API Link
+    $ch = curl_init("https://api.groq.com/openai/v1/chat/completions");
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-    curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
-
-    // Handle Local Machine Test Environments safely
-    if (isset($_SERVER['HTTP_HOST']) && (strpos($_SERVER['HTTP_HOST'], 'localhost') !== false || strpos($_SERVER['HTTP_HOST'], '127.0.0.1') !== false)) {
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-    }
-
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
+        "model" => "llama-3.3-70b-versatile",
+        "messages" => $model_messages
+    ]));
     curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 25);
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
         'Content-Type: application/json',
-        'Authorization: Bearer ' . $api_key,
-        'Expect:'
+        'Authorization: Bearer ' . $api_key
     ]);
 
     $response = curl_exec($ch);
-
-    if ($response === false) {
-        $err = curl_error($ch);
-        curl_close($ch);
-        http_response_code(502);
-        echo json_encode([
-            'error' => 'Gateway Connection Timeout',
-            'details' => 'Groq API backend infrastructure transport failed: ' . $err
-        ]);
-        exit;
-    }
-
-    $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
 
-    if ($code !== 200) {
-        // If Groq rejects your API key, this passes the explicit reason to app.js
-        http_response_code($code);
-        echo json_encode([
-            'error' => 'Groq execution endpoint rejected package structure.',
-            'status_code' => $code,
-            'details' => json_decode($response, true)
-        ]);
-        exit;
+    if ($http_code !== 200) {
+        $error_payload = json_decode($response, true);
+        $err_msg = $error_payload['error']['message'] ?? "Server returned HTTP status code: " . $http_code;
+        throw new Exception("Groq API Error: " . $err_msg);
     }
 
-    // 6. Output Generation Parsing and Database Syncing
-    $res = json_decode($response, true);
-    $assistant_text = $res['choices'][0]['message']['content'] ?? 'No text generated.';
+    $result_data = json_decode($response, true);
+    $reply = $result_data['choices'][0]['message']['content'] ?? 'No response text generated.';
 
-    add_message($conversation_id, 'assistant', $assistant_text);
+    // 6. Log Outbound AI Reply to Database
+    add_message($conversation_id, 'assistant', $reply);
 
-    // Clean JSON response for your JavaScript layer
+    // Return payload format matching app.js expectations
     echo json_encode([
-        'reply' => $assistant_text, 
+        'reply' => $reply,
         'conversation_id' => $conversation_id
     ]);
 
 } catch (Throwable $t) {
-    // Structural catch block prevents unhandled runtime exceptions from leaking plain text
-    http_response_code(500);
+    // Intercept engine cracks and output them as message details instead of crashing with a 500
+    http_response_code(200); 
     echo json_encode([
-        'error' => 'Internal server processing exception generated.',
-        'details' => $t->getMessage(),
-        'file' => $t->getFile(),
-        'line' => $t->getLine()
+        'error' => true,
+        'reply' => "⚠️ Engine Sync Alert: " . $t->getMessage(),
+        'debug_details' => [
+            'file' => basename($t->getFile()),
+            'line' => $t->getLine()
+        ]
     ]);
     exit;
 }
