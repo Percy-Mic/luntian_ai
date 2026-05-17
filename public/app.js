@@ -75,6 +75,12 @@ document.addEventListener('DOMContentLoaded', () => {
         contentDiv.className = 'message-content';
 
         if (role === 'assistant' && typeof marked !== 'undefined') {
+            // FIX: Enable breaks globally right before parsing to keep poem stanzas intact
+            marked.setOptions({
+                breaks: true,
+                gfm: true
+            });
+            
             contentDiv.innerHTML = marked.parse(text);
             contentDiv.querySelectorAll('pre').forEach((block) => {
                 const container = document.createElement('div');
@@ -134,8 +140,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 credentials: "include",
                 body: JSON.stringify({ prompt: text, conversation_id: currentChatId })
             });
+
+            // Catch explicit backend server response blocks (e.g. 404, 500)
+            if (!res.ok) {
+                throw new Error(`Server status returned ${res.status}`);
+            }
+
             const data = await res.json();
             showTyping(false);
+            
             if (data.reply) {
                 if (!currentChatId || currentChatId == 'temp') {
                     activeChat.id = data.conversation_id;
@@ -147,10 +160,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 speakText(cleanText);
                 saveToStorage();
                 renderHistory();
+            } else if (data.error) {
+                // Handle logical error messages clean from API response
+                appendMessageDOM('assistant', `⚠️ Error from server: ${data.error}`);
             }
         } catch (err) {
             showTyping(false);
-            appendMessageDOM('assistant', '⚠️ Connection lost.');
+            console.error("API Fetch Error:", err);
+            appendMessageDOM('assistant', `⚠️ Connection lost or error processing request (${err.message}).`);
         }
     }
 
@@ -160,8 +177,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const recognition = new Recognition();
         recognition.continuous = false; 
         recognition.interimResults = false;
-        
-        // SETTING TO FILIPINO
         recognition.lang = 'fil-PH'; 
 
         recognition.onstart = () => {
@@ -177,12 +192,25 @@ document.addEventListener('DOMContentLoaded', () => {
             userInput.focus();
         };
 
+        // NEW: Enhanced error handling messaging for the speech recognition interface
         recognition.onerror = (event) => {
-            if (event.error === 'not-allowed') {
-                alert("Hindi pinayagan ang mic. I-check ang browser settings.");
-            }
+            console.error("Speech Recognition Error:", event.error);
             micBtn.classList.remove('pulse');
             isListening = false;
+
+            switch (event.error) {
+                case 'not-allowed':
+                    alert("🎤 Mic Access Blocked: Hindi pinayagan ang mic. I-click ang lock/settings icon sa tabi ng URL at gawing 'Allow' ang Microphone.");
+                    break;
+                case 'network':
+                    alert("🌐 Network Error: Nawalan ng koneksyon sa speech processing server. I-check ang iyong internet.");
+                    break;
+                case 'no-speech':
+                    console.log("No speech detected by microphone endpoint.");
+                    break;
+                default:
+                    alert(`⚠️ Speech Recognition Error encountered: ${event.error}`);
+            }
         };
 
         recognition.onend = () => {
@@ -198,11 +226,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             if (!isListening) {
-                recognition.start();
+                try {
+                    recognition.start();
+                } catch (err) {
+                    console.error("Failed to start speech recognition:", err);
+                }
             } else {
                 recognition.stop();
             }
         };
+    } else {
+        console.warn("Speech recognition framework is completely unavailable on this browser client environment.");
     }
 
     function createNewChat() {
@@ -255,6 +289,7 @@ document.addEventListener('DOMContentLoaded', () => {
             window.speechSynthesis.cancel(); 
             const utter = new SpeechSynthesisUtterance(text);
             
+            // Adjust to en-US or fil-PH as needed depending on preference
             utter.lang = 'en-US'; 
             
             utter.onstart = () => { if(stopSpeechBtn) stopSpeechBtn.style.display = 'flex'; };
@@ -264,5 +299,3 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 });
-
-
