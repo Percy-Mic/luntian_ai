@@ -6,24 +6,28 @@ if (!defined('DB_HOST')) {
 }
 
 try {
-    // CRITICAL FIX: Explicitly appending Aiven's required SSL query mode
+    // Check if configuration successfully populated the environment array variables
+    if (DB_HOST === null || DB_NAME === null) {
+        throw new Exception("Database configuration values are unassigned or failed to load from Vercel.");
+    }
+
+    // Aiven PostgreSQL strictly requires sslmode=require over TLS/SSL transit
     $dsn = "pgsql:host=" . DB_HOST . ";port=" . DB_PORT . ";dbname=" . DB_NAME . ";sslmode=require";
     
-    // Instantiate PDO connection securely
     $pdo = new PDO($dsn, DB_USER, DB_PASS, [
         PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
         PDO::ATTR_EMULATE_PREPARES   => false,
     ]);
 
-} catch (PDOException $e) {
-    // Log the actual system tracking message silently inside Vercel's terminal
-    error_log("Luntian DB Connection Error: " . $e->getMessage());
+} catch (Throwable $e) {
+    // Log the error silently to Vercel logs without breaking JSON formats
+    error_log("Luntian Database Link Error: " . $e->getMessage());
     
-    // Send a structured JSON response so app.js can catch it and display a clean error on screen
     header('Content-Type: application/json');
     echo json_encode([
-        'error' => 'Hindi makakonekta sa structural database. Subukan muli mamaya.'
+        'error' => 'Database connection configuration exception.',
+        'details' => $e->getMessage()
     ]);
     exit;
 }
