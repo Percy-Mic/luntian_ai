@@ -1,4 +1,6 @@
-<?php require_once __DIR__ . '/config.php'; ?>
+<?php <?php
+require_once __DIR__ . '/_config.php';
+// ... rest of your index page logic ... ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
