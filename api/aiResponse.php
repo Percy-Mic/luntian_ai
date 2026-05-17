@@ -2,16 +2,17 @@
 // api/aiResponse.php
 header('Content-Type: application/json');
 
+// Force display errors to assist the catch block if an lower engine fault occurs
+ini_set('display_errors', 0); 
+error_reporting(E_ALL);
+
 try {
     // 1. Establish Core Framework Requirements
-    header('Content-Type: application/json');
-
-    // Pulling internal configurations using Vercel's private file formatting
     require_once __DIR__ . '/_config.php';
     require_once __DIR__ . '/_db_connect.php';
     require_once __DIR__ . '/_chat_history.php';
 
-    // Parse Input
+    // 2. Parse Input Securely
     $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
     $prompt = $input['prompt'] ?? ($input['message'] ?? '');
     $conversation_id = isset($input['conversation_id']) ? $input['conversation_id'] : null;
@@ -37,20 +38,22 @@ try {
         'content' => "You are Luntian, a friendly assistant developed by Percy Mic. Be concise and helpful."
     ];
 
-    // Build historical depth layers
+    // Build historical depth layers safely matching schema variations
     $history = get_messages_for_conversation($conversation_id);
-    foreach ($history as $m) {
-        // Fallback catch for schema row variations ('message_text' or 'content')
-        $text_content = $m['message_text'] ?? ($m['content'] ?? '');
-        if (!empty($text_content)) {
-            $model_messages[] = [
-                'role' => $m['role'], 
-                'content' => $text_content
-            ];
+    if (is_array($history)) {
+        foreach ($history as $m) {
+            // Safe fallback catch for table schema layout variations ('message_text' or 'content')
+            $text_content = $m['content'] ?? ($m['message_text'] ?? '');
+            if (!empty($text_content)) {
+                $model_messages[] = [
+                    'role' => $m['role'], 
+                    'content' => $text_content
+                ];
+            }
         }
     }
 
-    // Make sure the immediate current prompt is inside the context payload array
+    // Make sure the immediate current prompt is inside the context payload array if history was empty
     if (empty($model_messages) || end($model_messages)['content'] !== $prompt) {
         $model_messages[] = ['role' => 'user', 'content' => $prompt];
     }
@@ -69,7 +72,7 @@ try {
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
     curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
 
-    // Manage Local Machine Testing Environments
+    // Manage Local Machine Testing Environments (Localhost / XAMPP)
     if (isset($_SERVER['HTTP_HOST']) && (strpos($_SERVER['HTTP_HOST'], 'localhost') !== false || strpos($_SERVER['HTTP_HOST'], '127.0.0.1') !== false)) {
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
