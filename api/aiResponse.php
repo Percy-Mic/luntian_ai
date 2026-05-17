@@ -3,17 +3,17 @@
 header('Content-Type: application/json');
 
 try {
-    // Relative requirements based on your repository folder layout
+    // 1. Establish Core Framework Requirements
     require_once __DIR__ . '/config.php';
     require_once __DIR__ . '/db_connect.php';
     require_once __DIR__ . '/chat_history.php';
 
-    // Parse Input safely
+    // 2. Safely Process Inbound Payload Data
     $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
     $prompt = $input['prompt'] ?? ($input['message'] ?? '');
     $conversation_id = isset($input['conversation_id']) ? $input['conversation_id'] : null;
 
-    // Filter out temporary string IDs from localStorage
+    // Filter out temporary client-side IDs from localStorage
     if (!$conversation_id || strpos($conversation_id, 'temp-') === 0) {
         $conversation_id = create_conversation('Chat via web');
     } else {
@@ -21,22 +21,23 @@ try {
     }
 
     if (empty($prompt)) {
-        throw new Exception("Prompt text cannot be blank.");
+        throw new Exception("Prompt text field cannot be completely blank.");
     }
 
-    // Save user message to database
+    // 3. Document Inbound Message Context to Database
     add_message($conversation_id, 'user', $prompt);
 
-    // Prepare Messages Context History Layer for Groq
+    // 4. Structure Groq LLM Chat Array
     $model_messages = [];
     $model_messages[] = [
         'role' => 'system',
         'content' => "You are Luntian, a friendly assistant developed by Percy Mic. Be concise and helpful."
     ];
 
+    // Build historical depth layers
     $history = get_messages_for_conversation($conversation_id);
     foreach ($history as $m) {
-        // Safe check: handles database columns named either 'content' or 'message_text'
+        // Fallback catch for schema row variations ('message_text' or 'content')
         $text_content = $m['message_text'] ?? ($m['content'] ?? '');
         if (!empty($text_content)) {
             $model_messages[] = [
@@ -46,11 +47,12 @@ try {
         }
     }
 
-    // Append current prompt context if not duplicated in history query
-    if (end($model_messages)['content'] !== $prompt) {
+    // Make sure the immediate current prompt is inside the context payload array
+    if (empty($model_messages) || end($model_messages)['content'] !== $prompt) {
         $model_messages[] = ['role' => 'user', 'content' => $prompt];
     }
 
+    // 5. Initialize Groq AI Endpoint Payload Processing
     $url = "https://api.groq.com/openai/v1/chat/completions";
     $data = [
         "model" => "llama-3.3-70b-versatile",
@@ -64,7 +66,7 @@ try {
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
     curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
 
-    // Dynamic environment handling: Allow unsecured peer connections ONLY on localhost
+    // Manage Local Machine Testing Environments
     if (isset($_SERVER['HTTP_HOST']) && (strpos($_SERVER['HTTP_HOST'], 'localhost') !== false || strpos($_SERVER['HTTP_HOST'], '127.0.0.1') !== false)) {
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
@@ -73,8 +75,12 @@ try {
     curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
     curl_setopt($ch, CURLOPT_TIMEOUT, 30);
 
-    // Verify your Groq/OpenAI key variable constant configuration name
-    $api_key = defined('OPENAI_API_KEY') ? OPENAI_API_KEY : getenv('OPENAI_API_KEY');
+    // Securely pull API secret keys via Vercel Environment Context Variables
+    $api_key = defined('OPENAI_API_KEY') ? OPENAI_API_KEY : (getenv('OPENAI_API_KEY') ?: getenv('GROQ_API_KEY'));
+
+    if (empty($api_key)) {
+        throw new Exception("Groq system access key token is missing from host variables engine.");
+    }
 
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
         'Content-Type: application/json',
@@ -87,7 +93,7 @@ try {
     if ($response === false) {
         $err = curl_error($ch);
         curl_close($ch);
-        throw new Exception("Groq API cURL call connection failure: " . $err);
+        throw new Exception("Groq API backend infrastructure transport failed: " . $err);
     }
 
     $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -96,30 +102,30 @@ try {
     if ($code !== 200) {
         http_response_code($code);
         echo json_encode([
-            'error' => 'Groq API interface rejected request payload.',
+            'error' => 'Groq execution endpoint rejected package structure.',
             'status_code' => $code,
             'details' => json_decode($response, true)
         ]);
         exit;
     }
 
+    // 6. Output Generation Parsing and Database Syncing
     $res = json_decode($response, true);
-    $assistant_text = $res['choices'][0]['message']['content'] ?? 'No response returned from model framework context.';
+    $assistant_text = $res['choices'][0]['message']['content'] ?? 'No text generated.';
 
-    // Save assistant text to database
     add_message($conversation_id, 'assistant', $assistant_text);
 
-    // Clean execution output array transmission
+    // Structured presentation return
     echo json_encode([
         'reply' => $assistant_text, 
         'conversation_id' => $conversation_id
     ]);
 
 } catch (Throwable $t) {
-    // Keeps JSON output clean even on deep structural failures
+    // Catch-all to trap breaks inside JSON blocks to stop frontend interface syntax parse crashes
     http_response_code(500);
     echo json_encode([
-        'error' => 'Backend script runtime exception encountered.',
+        'error' => 'Internal server processing exception generated.',
         'details' => $t->getMessage()
     ]);
     exit;
