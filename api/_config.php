@@ -3,12 +3,11 @@
 
 // 1. Securely check environment variables from Vercel's isolated environment
 if (!defined('OPENAI_API_KEY')) {
-    // Rely completely on Vercel Dashboard Environment settings
     $env_key = getenv('GROQ_API_KEY') ?: ($_ENV['GROQ_API_KEY'] ?? ($_SERVER['GROQ_API_KEY'] ?? getenv('OPENAI_API_KEY')));
     define('OPENAI_API_KEY', $env_key);
 }
 
-// 2. Map Vercel System Database Keys with Global Array Fallbacks
+// 2. Map Vercel System Database Keys with Comprehensive Scope Check
 $host = getenv('POSTGRES_HOST') ?: ($_ENV['POSTGRES_HOST'] ?? ($_SERVER['POSTGRES_HOST'] ?? ''));
 $name = getenv('POSTGRES_DATABASE') ?: ($_ENV['POSTGRES_DATABASE'] ?? ($_SERVER['POSTGRES_DATABASE'] ?? ''));
 $user = getenv('POSTGRES_USER') ?: ($_ENV['POSTGRES_USER'] ?? ($_SERVER['POSTGRES_USER'] ?? ''));
