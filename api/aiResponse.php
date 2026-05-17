@@ -4,11 +4,14 @@ header('Content-Type: application/json');
 
 try {
     // 1. Establish Core Framework Requirements
-    require_once __DIR__ . '/config.php';
-    require_once __DIR__ . '/db_connect.php';
-    require_once __DIR__ . '/chat_history.php';
+    header('Content-Type: application/json');
 
-    // 2. Safely Process Inbound Payload Data
+    // Pulling internal configurations using Vercel's private file formatting
+    require_once __DIR__ . '/_config.php';
+    require_once __DIR__ . '/_db_connect.php';
+    require_once __DIR__ . '/_chat_history.php';
+
+    // Parse Input
     $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
     $prompt = $input['prompt'] ?? ($input['message'] ?? '');
     $conversation_id = isset($input['conversation_id']) ? $input['conversation_id'] : null;
