@@ -1,57 +1,60 @@
 <?php
-// chat_history.php
-require_once __DIR__ . '/db_connect.php'; // Corrected __DIR__ usage and added slash
+// api/chat_history.php
 
-// Get messages for a conversation
-function get_messages_for_conversation($conversation_id) {
-    global $pdo; // Use $pdo from db_connect.php
-    
-    $stmt = $pdo->prepare("
-        SELECT role, message_text AS content 
-        FROM messages 
-        WHERE conversation_id = ? 
-        ORDER BY id ASC
-    ");
-    $stmt->execute([$conversation_id]);
-    
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+/**
+ * Creates a brand new conversation thread record in the database
+ */
+function create_conversation($title = 'Chat via web') {
+    global $pdo;
+    try {
+        // We use a safe INSERT query. Adjust 'title' if your table column uses a different name.
+        $stmt = $pdo->prepare("INSERT INTO conversations (title, created_at) VALUES (:title, NOW()) RETURNING id");
+        $stmt->execute(['title' => $title]);
+        
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result['id'] ?? $pdo->lastInsertId();
+    } catch (Exception $e) {
+        error_log("Failed to create conversation: " . $e->getMessage());
+        throw new Exception("Database creation error: " . $e->getMessage());
+    }
 }
 
-// Add a message
+/**
+ * Saves an explicit message row to a conversation thread
+ */
 function add_message($conversation_id, $role, $content) {
     global $pdo;
-    
-    $stmt = $pdo->prepare("
-        INSERT INTO messages (conversation_id, role, message_text) 
-        VALUES (?, ?, ?)
-    ");
-    $stmt->execute([$conversation_id, $role, $content]);
-    
-    return $pdo->lastInsertId();
+    try {
+        // Standardizing column names: handles tables that use 'message_text' or 'content'
+        // If your column name is strictly 'message_text', change 'content' below to 'message_text'
+        $query = "INSERT INTO messages (conversation_id, role, content, created_at) 
+                  VALUES (:conversation_id, :role, :content, NOW())";
+                  
+        $stmt = $pdo->prepare($query);
+        $stmt->execute([
+            'conversation_id' => intval($conversation_id),
+            'role' => $role,
+            'content' => $content
+        ]);
+        return true;
+    } catch (Exception $e) {
+        error_log("Failed to save message: " . $e->getMessage());
+        throw new Exception("Database save error: " . $e->getMessage());
+    }
 }
 
-// Create a conversation
-function create_conversation($title = 'New Chat') {
+/**
+ * Fetches historical chat dialogue sequences for LLM context injection
+ */
+function get_messages_for_conversation($conversation_id) {
     global $pdo;
-    
-    $stmt = $pdo->prepare("
-        INSERT INTO conversations (title) 
-        VALUES (?)
-    ");
-    $stmt->execute([$title]);
-    
-    return $pdo->lastInsertId();
-}
-
-// List all conversations
-function list_conversations() {
-    global $pdo;
-    
-    $stmt = $pdo->query("
-        SELECT id, title, created_at 
-        FROM conversations 
-        ORDER BY created_at DESC
-    ");
-    
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    try {
+        $stmt = $pdo->prepare("SELECT role, content FROM messages WHERE conversation_id = :conversation_id ORDER BY created_at ASC");
+        $stmt->execute(['conversation_id' => intval($conversation_id)]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    } catch (Exception $e) {
+        error_log("Failed to fetch message history: " . $e->getMessage());
+        // Return an empty array instead of crashing the whole script if history retrieval fails
+        return [];
+    }
 }
