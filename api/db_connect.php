@@ -1,6 +1,6 @@
 <?php
 try {
-    $dsn = "postgres://avnadmin:<redacted>@pg-1a941fca-percymicnono-12e0.f.aivencloud.com:18500/defaultdb?sslmode=require"; 
+    $dsn = getenv('DATABASE_URL'); 
     if (!$dsn) {
         throw new Exception("DATABASE_URL is not set in Vercel.");
     }
