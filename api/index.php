@@ -158,10 +158,10 @@
 </div>
 <section class="chat-box flex-1 overflow-y-auto p-4 md:p-8 pb-32 scroll-smooth flex flex-col gap-4 h-full" id="chat-box">
 <!-- Simulated messages for visual representation of alignment -->
-<div class="message-user max-w-[85%] sm:max-w-[75%] p-4 rounded-2xl shadow-sm bg-primary text-white self-end">
+<div class="max-w-[85%] sm:max-w-[75%] p-4 rounded-2xl shadow-sm bg-primary text-white self-end">
 <p class="">Hello! Can you help me with a design?</p>
 </div>
-<div class="message-ai max-w-[85%] sm:max-w-[75%] p-4 rounded-2xl shadow-sm bg-surface-container-high dark:bg-on-secondary-fixed border border-outline-variant/20 dark:border-outline/20">
+<div class="max-w-[85%] sm:max-w-[75%] p-4 rounded-2xl shadow-sm bg-surface-container-high dark:bg-on-secondary-fixed border border-outline-variant/20 dark:border-outline/20">
 <p class="">Of course! I can help you create a beautiful design using the Serene Violet palette. What are you looking to build?</p>
 </div>
 </section><!--Chat container-->
