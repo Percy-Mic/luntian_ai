@@ -1,166 +1,13 @@
-* {
-  --sidebar-bgcolor: sienna;
-  margin: 0px;
-}
-
 body {
   font-family: 'Segoe UI', sans-serif;
   background-color: #f9fafb;
   display: flex;
-  overflow: scroll;
+  overflow-y: scroll;
 }
 
 .app-container {
   display: flex;
   width: 100%;
-  margin-left: 3px;
-}
-
-.sidebar {
-  left: 2px;
-  top: 0px;
-  bottom: 0px;
-  width: 260px;
-  background: var(--sidebar-bgcolor);
-  border-right: 1px solid #e5e5e5;
-  height: 100%;
-  overflow: hidden;
-  overflow-y: auto;
-  transition: transform 0.3s ease;
-  justify-content: center;
-}
-
-#menu {
-  display: none;
-  position: fixed;
-  top: 5px;
-  right: 5px;
-  z-index: 1100;
-  border: none;
-  border-radius: 8px;
-  background: transparent;
-  opacity: 75%;
-}
-
-#menu:hover {
-  opacity: 100%;
-}
-
-#menu:active {
-  scale: 1.1;
-}
-
-@media (max-width: 550px) {
-  .sidebar {
-    position: fixed;
-    left: 0;
-    top: 0;
-    transform: translateX(-100%);
-    z-index: 1000;
-  }
-
-  .sidebar.open {
-    width: 60%;
-    transform: translateX(2%);
-  }
-
-  #menu {
-    display: block;
-  }
-
-
-}
-
-.sidebar-header {
-  padding: 20px;
-  display: flex;
-  justify-content: center;
-}
-
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 1.2rem;
-  font-weight: bold;
-  font-family: cursive;
-  padding: 10px;
-}
-
-.history-list {
-  list-style: none;
-  margin-top: 1rem;
-  overflow-y: auto;
-  flex-grow: 1;
-}
-
-.sidebar-footer {
-  padding: 10px;
-  border-top: solid snow;
-  font-family: cursive;
-  text-align: center;
-}
-
-.sidebar button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0.5rem;
-  transition: background 0.2s;
-}
-
-#new-chat-btn {
-  text-align: center;
-  box-shadow: 0px 0px 10px peru;
-  border-radius: 10px;
-  padding: 10px;
-  background: rgb(235, 179, 235);
-  width: 90%;
-  margin-left: 50%;
-  transform: translate(-50%);
-  margin-bottom: 20px;
-}
-
-.history-list {
-  flex: 1;
-  overflow: auto;
-  padding: 8px 4px;
-  margin: 0;
-  list-style: none;
-}
-
-.history-list li {
-  padding: 10px 12px;
-  margin-bottom: 8px;
-  color: var(--muted);
-  cursor: pointer;
-  background: transparent;
-  opacity: 75%;
-  transition: all 0.15s;
-}
-
-.history-list li:hover {
-  opacity: 100%;
-  color: black;
-}
-
-.icon-button {
-  background: none;
-  border: none;
-  padding: 6px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-}
-
-.icon-button img {
-  width: 20px;
-  height: 20px;
-  opacity: 0.7;
-}
-
-.icon-button:hover img {
-  opacity: 1;
 }
 
 .chat-area {
@@ -172,17 +19,6 @@ body {
   padding-bottom: 10%;
   overflow-y: scroll;
   overflow-x: hidden;
-}
-
-.ai-header h1 {
-  font-size: 2rem;
-  margin-bottom: 0.25rem;
-  color: #45f890;
-}
-
-.ai-header p {
-  color: #6b7280;
-  margin-bottom: 1rem;
 }
 
 .chat-box {
@@ -232,20 +68,6 @@ form {
   flex-direction: row;
 }
 
-#user-input {
-  flex: 1;
-  background: transparent;
-  border: none;
-  outline: none;
-  resize: none;
-  font-size: 15px;
-  line-height: 20px;
-  padding-top: 4px;
-  min-height: 42px;
-  max-height: 50vh;
-  overflow-y: scroll;
-}
-
 .bot {
   background: sienna;
   align-self: flex-start;
@@ -288,10 +110,6 @@ form {
   display: flex;
   align-items: center;
   transition: color 0.2s;
-}
-
-.delete-btn svg {
-  pointer-events: none;
 }
 
 .chat-item.active {
@@ -379,14 +197,4 @@ form {
 
 .stop-speech-btn img {
     filter: brightness(0) invert(1); /* Makes icon white */
-}
-
-.pulse {
-    animation: pulse-red 1.5s infinite;
-}
-
-@keyframes pulse-red {
-    0% { transform: scale(1); filter: drop-shadow(0 0 10px dodgerblue); }
-    70% { transform: scale(1.05); filter: drop-shadow(0 0 10px rgb(128, 30, 255)); }
-    100% { transform: scale(1); filter: drop-shadow(0 0 10px rgb(255, 30, 244));  }
 }
