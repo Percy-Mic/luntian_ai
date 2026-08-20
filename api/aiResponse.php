@@ -1,138 +1,176 @@
 <?php
 // api/aiResponse.php
 
-// 1. Prevent buffer artifacts or notices from ruining JSON output
-if (ob_get_length()) ob_clean();
+header('Content-Type: application/json');
 
+// Enable error reporting for logs (Disable display in production)
 ini_set('display_errors', 0);
 error_reporting(E_ALL);
 
-header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Headers: Content-Type, Authorization');
-header('Access-Control-Allow-Methods: POST, OPTIONS');
+// Define API Key (Best practice: Load from environment or config file)
+define('GROQ_API_KEY', getenv('GROQ_API_KEY') ?: 'YOUR_GROQ_API_KEY_HERE');
 
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    exit(0);
-}
+// Include your database connection ($pdo)
+require_once __DIR__ . '/../config/db.php'; 
 
-try {
-    require_once __DIR__ . '/_config.php';
-    require_once __DIR__ . '/_db_connect.php';
-    require_once __DIR__ . '/_chat_history.php';
+// --- DATABASE HELPER FUNCTIONS ---
 
-    // 2. Parse Inbound Request Data
-    $raw_input = file_get_contents('php://input');
-    $input = json_decode($raw_input, true) ?? $_POST;
+/**
+ * Fetch chat history for a specific conversation in chronological order
+ */
+function get_messages_for_conversation($pdo,$conversation_id) {
+    if (!$conversation_id) return [];
     
-    $prompt = trim($input['prompt'] ?? ($input['message'] ?? ''));
-    $conversation_id = isset($input['conversation_id']) ? $input['conversation_id'] : null;
-
-    if (empty($prompt)) {
-        http_response_code(400);
-        echo json_encode(['error' => 'Prompt text string cannot be empty.']);
-        exit;
+    try {
+        $stmt =$pdo->prepare("
+            SELECT role, message_text 
+            FROM messages 
+            WHERE conversation_id = :cid 
+            ORDER BY id ASC
+        ");
+        $stmt->execute([':cid' =>$conversation_id]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    } catch (Exception $e) {
+        error_log("Failed to load chat history: " . $e->getMessage());
+        return [];
     }
+}
 
-    // 3. Handle Conversation Persistence
-    if (!$conversation_id || strpos((string)$conversation_id, 'temp-') === 0 || $conversation_id === 'null') {
-        $conversation_id = create_conversation('Luntian Chat Thread');
-        if (!$conversation_id) {
-            throw new Exception("Database failed to initialize a new conversation ID row.");
-        }
-    } else {
-        $conversation_id = intval($conversation_id);
+/**
+ * Save a message turn (user or assistant) to the database
+ */
+function save_message($pdo,$conversation_id, $role,$text) {
+    try {
+        $stmt =$pdo->prepare("
+            INSERT INTO messages (conversation_id, role, message_text, created_at) 
+            VALUES (:cid, :role, :msg, NOW())
+        ");
+        $stmt->execute([
+            ':cid'  => $conversation_id,
+            ':role' => $role,
+            ':msg'  => $text
+        ]);
+        return true;
+    } catch (Exception $e) {
+        error_log("Failed to save message: " . $e->getMessage());
+        return false;
     }
+}
 
-    // 4. STEP 1: Save the current user message to DB FIRST
-    add_message($conversation_id, 'user', $prompt);
-
-    // 5. STEP 2: Fetch the FULL updated conversation history from DB
-    $history = get_messages_for_conversation($conversation_id); 
-
-    // 6. Construct AI Payload with Base System Instructions
-    $model_messages = [
-        [
-            'role' => 'system',
-            'content' => "You are Luntian AI, a helpful virtual assistant created by Percy Mic. Keep responses context-aware, precise, and natural. Maintain complete awareness of all prior dialogue turns."
-        ]
-    ];
-
-    if (!empty($history) && is_array($history)) {
-        foreach ($history as $msg) {
-            $text = $msg['message_text'] ?? ($msg['content'] ?? '');
-            
-            // Normalize DB roles to strict Groq expectations ('user' or 'assistant')
-            $raw_role = strtolower($msg['role'] ?? 'user');
-            $role = ($raw_role === 'bot' || $raw_role === 'assistant' || $raw_role === 'ai') 
-                ? 'assistant' 
-                : 'user';
-
-            if (!empty(trim($text))) {
-                $model_messages[] = [
-                    'role' => $role,
-                    'content' => $text
-                ];
-            }
-        }
+/**
+ * Create a new conversation record if none exists
+ */
+function create_new_conversation($pdo) {
+    try {
+        $stmt =$pdo->prepare("INSERT INTO conversations (created_at) VALUES (NOW())");
+        $stmt->execute();
+        return $pdo->lastInsertId();
+    } catch (Exception $e) {
+        error_log("Failed to create conversation: " . $e->getMessage());
+        return null;
     }
+}
 
-    // 7. Verify API Key
-    $api_key = defined('OPENAI_API_KEY') ? OPENAI_API_KEY : (getenv('OPENAI_API_KEY') ?: null);
-    if (empty($api_key)) {
-        throw new Exception("Groq system API token key is missing or undefined inside config constants.");
-    }
+// --- MAIN EXECUTION ---
 
-    // 8. Execute Request to Groq Endpoint
-    $ch = curl_init("https://api.groq.com/openai/v1/chat/completions");
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
-        "model" => "openai/gpt-oss-120b",
-        "messages" => array_values($model_messages)
-    ]));
-    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 25);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, [
-        'Content-Type: application/json',
-        'Authorization: Bearer ' . $api_key
-    ]);
+// 1. Read Request Body
+$rawInput = file_get_contents('php_input');$input = json_decode($rawInput, true) ?? $_POST;
 
-    $response = curl_exec($ch);
-    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
+$prompt = trim($input['prompt'] ?? '');
+$conversation_id =$input['conversation_id'] ?? null;
 
-    if ($http_code !== 200) {
-        $error_payload = json_decode($response, true);
-        $err_msg = $error_payload['error']['message'] ?? "Server returned HTTP status code: " . $http_code;
-        throw new Exception("Groq API Error: " . $err_msg);
-    }
-
-    $result_data = json_decode($response, true);
-    $reply = $result_data['choices'][0]['message']['content'] ?? 'No response text generated.';
-
-    // 9. Save Assistant Response to Database
-    add_message($conversation_id, 'assistant', $reply);
-
-    // 10. Clean Return Payload
-    if (ob_get_length()) ob_clean();
-    echo json_encode([
-        'reply' => $reply,
-        'conversation_id' => $conversation_id
-    ]);
+if (empty($prompt)) {
+    echo json_encode(['error' => 'Prompt cannot be empty.']);
     exit;
+}
 
-} catch (Throwable $t) {
-    if (ob_get_length()) ob_clean();
-    http_response_code(200);
+// 2. Ensure Conversation ID exists
+if (!$conversation_id) {
+    $conversation_id = create_new_conversation($pdo);
+}
+
+// 3. Save incoming user message to Database
+save_message($pdo, $conversation_id, 'user',$prompt);
+
+// 4. Construct System Prompt & Payload Stack
+$model_messages = [
+    [
+        'role' => 'system',
+        'content' => "You are Luntian AI, an engaging, helpful, and precise virtual assistant created by Percy Mic. " .
+                     "Keep responses conversational, context-aware, and natural. " .
+                     "IMPORTANT FORMATTING RULE: Never put full code blocks or multi-line code examples inside Markdown tables. " .
+                     "Always output code snippets in standard triple-backtick (```) code blocks outside of tables."
+    ]
+];
+
+// 5. Fetch Previous History & Map Roles for Groq API
+$history = get_messages_for_conversation($pdo, $conversation_id);
+
+foreach ($history as $msg) {
+    $text = trim($msg['message_text'] ?? '');
+    $raw_role = strtolower($msg['role'] ?? 'user');
+    
+    // Normalize DB roles to allowed Groq roles ('user' or 'assistant')
+    $role = ($raw_role === 'assistant' || $raw_role === 'bot' || $raw_role === 'ai') 
+        ? 'assistant' 
+        : 'user';
+
+    if (!empty($text)) {
+        $model_messages[] = [
+            'role' => $role,
+            'content' => $text
+        ];
+    }
+}
+
+// 6. Send Request to Groq API using Active Model (openai/gpt-oss-120b)
+$api_key = trim(GROQ_API_KEY);
+
+$ch = curl_init("[https://api.groq.com/openai/v1/chat/completions](https://api.groq.com/openai/v1/chat/completions)");
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_POST, true);
+curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
+    "model" => "openai/gpt-oss-120b",
+    "messages" => $model_messages,
+    "temperature" => 0.7
+]));
+curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
+curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'Content-Type: application/json',
+    'Authorization: Bearer ' . $api_key
+]);
+
+$response = curl_exec($ch);
+$curl_error = curl_error($ch);
+$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+curl_close($ch);
+
+if ($curl_error) {
+    error_log("cURL Error: " . $curl_error);
+    echo json_encode(['error' => 'Failed to reach AI service.']);
+    exit;
+}
+
+$data = json_decode($response, true);
+
+if ($http_code !== 200 || !isset($data['choices'][0]['message']['content'])) {
+    error_log("Groq API Error Response: " . $response);
     echo json_encode([
-        'error' => true,
-        'reply' => "⚠️ Engine Sync Alert: " . $t->getMessage(),
-        'conversation_id' => $conversation_id ?? null,
-        'debug_details' => [
-            'file' => basename($t->getFile()),
-            'line' => $t->getLine()
-        ]
+        'error' => 'AI generation failed.',
+        'details' => $data['error']['message'] ?? 'Unknown error'
     ]);
     exit;
 }
+
+// 7. Extract AI Response
+$ai_reply = $data['choices'][0]['message']['content'];
+
+// 8. Save Assistant Response to DB
+save_message($pdo, $conversation_id, 'assistant', $ai_reply);
+
+// 9. Return JSON Response to Frontend
+echo json_encode([
+    'reply' => $ai_reply,
+    'conversation_id' => $conversation_id
+]);
