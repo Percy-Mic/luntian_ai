@@ -90,12 +90,12 @@ if (!$last_msg || $last_msg['content'] !== $prompt || $last_msg['role'] !== 'use
         'content' => $prompt
     ];
 }
-    /*// 6. Append Incoming Prompt to DB and Payload Stack
+    // 6. Append Incoming Prompt to DB and Payload Stack
     add_message($conversation_id, 'user', $prompt);
     $model_messages[] = [
         'role' => 'user',
         'content' => $prompt
-    ];*/
+    ];
 
     // 7. Verify API Key
     $api_key = defined('OPENAI_API_KEY') ? OPENAI_API_KEY : (getenv('OPENAI_API_KEY') ?: null);
