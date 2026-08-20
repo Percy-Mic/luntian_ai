@@ -10,6 +10,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const sidebar = document.querySelector(".sidebar");
     const stopSpeechBtn = document.getElementById('stop-speech');
 
+    // In your JS rendering logic before appending response HTML
+let formattedReply = data.reply.replace(/\\n/g, '\n');
+
     // ===== CHAT STATE =====
     let chats = JSON.parse(localStorage.getItem('luntian_chats') || '[]');
     let currentChatId = localStorage.getItem('luntian_active_id') || null;
