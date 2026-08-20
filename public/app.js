@@ -10,9 +10,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const sidebar = document.querySelector(".sidebar");
     const stopSpeechBtn = document.getElementById('stop-speech');
 
-    // In your JS rendering logic before appending response HTML
-let formattedReply = data.reply.replace(/\\n/g, '\n');
-
     // ===== CHAT STATE =====
     let chats = JSON.parse(localStorage.getItem('luntian_chats') || '[]');
     let currentChatId = localStorage.getItem('luntian_active_id') || null;
@@ -78,7 +75,7 @@ let formattedReply = data.reply.replace(/\\n/g, '\n');
         contentDiv.className = 'message-content';
 
         if (role === 'assistant' && typeof marked !== 'undefined') {
-            // FIX: Enable breaks globally right before parsing to keep poem stanzas intact
+            // Enable breaks globally right before parsing to keep formatting intact
             marked.setOptions({
                 breaks: true,
                 gfm: true
@@ -144,7 +141,6 @@ let formattedReply = data.reply.replace(/\\n/g, '\n');
                 body: JSON.stringify({ prompt: text, conversation_id: currentChatId })
             });
 
-            // Catch explicit backend server response blocks (e.g. 404, 500)
             if (!res.ok) {
                 throw new Error(`Server status returned ${res.status}`);
             }
@@ -164,7 +160,6 @@ let formattedReply = data.reply.replace(/\\n/g, '\n');
                 saveToStorage();
                 renderHistory();
             } else if (data.error) {
-                // Handle logical error messages clean from API response
                 appendMessageDOM('assistant', `⚠️ Error from server: ${data.error}`);
             }
         } catch (err) {
@@ -174,7 +169,7 @@ let formattedReply = data.reply.replace(/\\n/g, '\n');
         }
     }
 
-    // ===== SPEECH TO TEXT (STT) - FILIPINO VERSION =====
+    // ===== SPEECH TO TEXT (STT) =====
     const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (Recognition) {
         const recognition = new Recognition();
@@ -195,7 +190,6 @@ let formattedReply = data.reply.replace(/\\n/g, '\n');
             userInput.focus();
         };
 
-        // NEW: Enhanced error handling messaging for the speech recognition interface
         recognition.onerror = (event) => {
             console.error("Speech Recognition Error:", event.error);
             micBtn.classList.remove('pulse');
@@ -292,7 +286,6 @@ let formattedReply = data.reply.replace(/\\n/g, '\n');
             window.speechSynthesis.cancel(); 
             const utter = new SpeechSynthesisUtterance(text);
             
-            // Adjust to en-US or fil-PH as needed depending on preference
             utter.lang = 'en-US'; 
             
             utter.onstart = () => { if(stopSpeechBtn) stopSpeechBtn.style.display = 'flex'; };
