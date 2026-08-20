@@ -97,15 +97,15 @@
 }
 
 /* Simulate dynamic content for demo purposes based on instructions */
-.message-user {
-      align-self: flex-end;
-      background-color: theme('colors.primary');
-      color: theme('colors.on-primary');
-      border-bottom-right-radius: 4px;
-  }
-  .message-ai {
-      align-self: flex-start;
-      background-color: theme('colors.surface-container-high');
-      color: theme('colors.on-surface');
-      border-bottom-left-radius: 4px;
-  }
+.user {
+    align-self: flex-end;
+    background-color: theme('colors.primary');
+    color: theme('colors.on-primary');
+    border-bottom-right-radius: 4px;
+}
+.bot {
+    align-self: flex-start;
+    background-color: theme('colors.surface-container-high');
+    color: theme('colors.on-surface');
+    border-bottom-left-radius: 4px;
+}
