@@ -1,12 +1,10 @@
-<!--?php require_once __DIR__ . '/_config.php'; ?--><!DOCTYPE html>
-
-<html class="light" lang="en"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<!DOCTYPE html><html class="light" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
 <title>Luntian Assistant</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&amp;family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&amp;family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
 <script id="tailwind-config">
     tailwind.config = {
       darkMode: "class",
@@ -132,7 +130,7 @@
 <aside class="sidebar fixed inset-y-0 left-0 z-50 w-[280px] bg-surface-container-low dark:bg-inverse-surface border-r border-outline-variant/30 dark:border-outline/30 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col md:relative md:flex shadow-lg font-headline-sm" id="drawer"><!--The sidebar-->
 <div class="sidebar-header p-6 flex items-center justify-between border-b border-outline-variant/30 dark:border-outline/30 font-headline-sm"><!--The side bar header-->
 <div class="brand flex items-center gap-3">
-<svg class="flex-shrink-0" height="24" viewbox="0 0 24 24" width="24"><circle cx="12" cy="12" fill="yellowgreen" r="10"></circle><circle cx="12" cy="12" fill="sienna" r="5"></circle></svg>
+<svg class="flex-shrink-0" height="24" viewBox="0 0 24 24" width="24"><circle cx="12" cy="12" fill="yellowgreen" r="10"></circle><circle cx="12" cy="12" fill="sienna" r="5"></circle></svg>
 <span class="font-headline-sm text-xl text-primary dark:text-primary-fixed truncate">Luntian AI</span>
 </div>
 <button class="md:hidden p-2 rounded-xl hover:bg-surface-container-highest dark:hover:bg-on-secondary-fixed text-on-surface-variant dark:text-inverse-on-surface" id="close-drawer">
@@ -140,7 +138,7 @@
 </button>
 </div>
 <div class="p-6 flex-shrink-0">
-<button class="w-full flex items-center justify-center gap-2 bg-primary text-white py-3.5 px-6 rounded-xl shadow-md hover:shadow-lg hover:bg-primary/90 transition-all active:scale-95 duration-200 font-label-md tracking-wide" id="new-chat-btn" title="New chat"><!--Add new conversation button-->
+<button class="w-full flex items-center justify-center gap-2 bg-primary text-white py-3.5 px-6 rounded-xl shadow-md hover:shadow-lg hover:bg-primary/90 transition-all active:scale-95 duration-200 font-label-md tracking-wide" id="new-chat-btn" title="New chat"><span class="material-symbols-outlined text-[18px]">add</span><!--Add new conversation button-->
             Add new chat
         </button>
 </div>
@@ -150,26 +148,21 @@
 <main class="chat-area flex-1 flex flex-col h-full relative bg-surface-bright dark:bg-[#201d40]">
 <div class="flex items-center gap-3 p-4 md:p-6 pb-0 border-b border-outline-variant/30 dark:border-outline/30 md:border-none justify-between">
 <div class="flex items-center gap-3">
-<button class="md:hidden p-2 -ml-2 rounded-xl hover:bg-surface-container dark:hover:bg-on-secondary-fixed transition-colors text-primary dark:text-primary-fixed" id="menu">
-<img alt="menu" class="w-6 h-6 object-contain" onerror="this.outerHTML='&lt;span class=\'material-symbols-outlined\'&gt;menu&lt;/span&gt;'" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDvH3quwSLmXRPnIFhfOQxpVF0aXKd_rnGk-93653zwh_NGpAPrCQN3XTF7cPxZMTx_gX3zp4GXmXEKgSwmiF-Ch790Tb0WBjNRdQhsboYqF_EwSvvesnLkBX1Emh90w8Iew1rvNw03TGOlueRpRbkPTlND7mGWRO5p76iJ4Nsr3OGijHSVxQPPH6sOe0VEYDZzqS501fgtOx04RCjvHZCH8U5oBAu5mWNRfW3PCSpwIT-oPp5f6Ihc" width="24px"/>
-</button>
+<button class="md:hidden p-2 -ml-2 rounded-xl hover:bg-surface-container dark:hover:bg-on-secondary-fixed transition-colors text-primary dark:text-primary-fixed" id="menu"><span class="material-symbols-outlined text-[18px]">menu</span></button>
 <header class="ai-header flex flex-col flex-1">
 <h1 class="font-headline-sm text-xl md:text-2xl text-primary dark:text-primary-fixed leading-tight">Luntian Assistant</h1>
 <p class="text-xs font-body-md text-on-surface-variant dark:text-inverse-on-surface hidden sm:block">Inteligent — precise, helpful, and expressive.</p>
 </header>
 </div>
-<button class="p-2 rounded-xl hover:bg-surface-container dark:hover:bg-on-secondary-fixed transition-colors text-primary dark:text-primary-fixed" id="theme-toggle" title="Toggle Theme">
-<span class="material-symbols-outlined dark:hidden">dark_mode</span>
-<span class="material-symbols-outlined hidden dark:block">light_mode</span>
-</button>
+<button class="p-2 rounded-xl hover:bg-surface-container dark:hover:bg-on-secondary-fixed transition-colors text-primary dark:text-primary-fixed" id="theme-toggle" title="Toggle Theme"><span class="material-symbols-outlined dark:hidden text-[18px]">dark_mode</span><span class="material-symbols-outlined hidden dark:block text-[18px]">light_mode</span></button>
 </div>
-<section class="chat-box flex-1 overflow-y-auto p-4 md:p-8 pb-32 scroll-smooth flex flex-col gap-4" id="chat-box">
+<section class="chat-box flex-1 overflow-y-auto p-4 md:p-8 pb-32 scroll-smooth flex flex-col gap-4 h-full" id="chat-box">
 <!-- Simulated messages for visual representation of alignment -->
 <div class="message-user max-w-[85%] sm:max-w-[75%] p-4 rounded-2xl shadow-sm bg-primary text-white self-end">
-<p>Hello! Can you help me with a design?</p>
+<p class="">Hello! Can you help me with a design?</p>
 </div>
 <div class="message-ai max-w-[85%] sm:max-w-[75%] p-4 rounded-2xl shadow-sm bg-surface-container-high dark:bg-on-secondary-fixed border border-outline-variant/20 dark:border-outline/20">
-<p>Of course! I can help you create a beautiful design using the Serene Violet palette. What are you looking to build?</p>
+<p class="">Of course! I can help you create a beautiful design using the Serene Violet palette. What are you looking to build?</p>
 </div>
 </section><!--Chat container-->
 <div class="flex justify-center w-full absolute bottom-28 z-10 pointer-events-none">
@@ -182,12 +175,8 @@
 <form action="chat.php" class="bg-surface-container-lowest dark:bg-inverse-surface shadow-lg shadow-primary-container/10 border border-outline-variant/30 dark:border-outline/30 rounded-2xl p-2 flex items-end gap-2 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all duration-300" method="POST">
 <textarea active="" class="flex-1 max-h-32 bg-transparent border-none focus:ring-0 resize-none py-3.5 px-3 font-body-md text-base text-on-background dark:text-inverse-on-surface placeholder:text-on-surface-variant/60 dark:placeholder:text-inverse-on-surface/60 min-h-[52px]" id="user-input" placeholder="Ask anything..."></textarea><!-- Textarea -->
 <div class="flex items-center gap-1 self-end mb-1 mr-1">
-<button class="icon-button p-2.5 rounded-xl hover:bg-surface-container dark:hover:bg-on-secondary-fixed text-on-surface-variant dark:text-inverse-on-surface transition-colors flex-shrink-0" id="mic-btn" type="button">
-<img alt="open mic" class="w-6 h-6 object-contain dark:invert" onerror="this.outerHTML='&lt;span class=\'material-symbols-outlined\'&gt;mic&lt;/span&gt;'" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDFo1101DP69XJpg3pJjeimwUYAJa3uAHck9rz5GyXAzNooWyx62XkcXAfN4hR-oEf_MGfZkbUeswcnlxoGjwgZtA6DG3Y9pZlKmE8FCCAsie1i4_5lRcQWt8xk9c8X4rOoaVwGD08-JiX-6Mlc6DnIFmH-qBjvax_JPXGxvi27rWeV6TM3R3HA5nUCRrLGKvoodA2K2Ul-UrCbcLmpkvrK3Lgg1GJT7fzWnRG0DhErOr8Cxc0LQf8X"/>
-</button><!-- Mic -->
-<button class="icon-button p-2.5 rounded-xl bg-primary-container dark:bg-primary text-white hover:shadow-md hover:scale-105 transition-all active:scale-95 flex-shrink-0" id="send-btn" type="submit">
-<img alt="send" class="w-6 h-6 object-contain filter invert" onerror="this.outerHTML='&lt;span class=\'material-symbols-outlined\' data-weight=\'fill\'&gt;send&lt;/span&gt;'" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDsBmTgo1WPmFY1o2YXBbADC0bieCp0mxEn9mcPWuRfjAV1WN-M8yjwYw6hwoeio80cxeMfObPsLgBPGH_h0u5AXodT-WoJJ5AwfBHL4DDil2F9X-IO4nqufa3u2EZqU3vEDGyjrNmsLg-x6JMbgLnLDIza8Jok0_gKLePT0Cm9j-d2UUsigZMEYzIUaDjnIGJFiT59AdKiiGsJWSyh-V0Hq90m36TDsYldcHyfroVymA5whqyIYJ6_"/>
-</button><!-- Send -->
+<button class="icon-button p-2.5 rounded-xl hover:bg-surface-container dark:hover:bg-on-secondary-fixed text-on-surface-variant dark:text-inverse-on-surface transition-colors flex-shrink-0" id="mic-btn" type="button"><span class="material-symbols-outlined text-[18px]">mic</span></button><!-- Mic -->
+<button class="icon-button p-2.5 rounded-xl bg-primary-container dark:bg-primary text-white hover:shadow-md hover:scale-105 transition-all active:scale-95 flex-shrink-0" id="send-btn" type="submit"><span class="material-symbols-outlined text-[18px]" data-weight="fill">send</span></button><!-- Send -->
 </div>
 </form>
 </div>
@@ -262,4 +251,6 @@
     }
   </script>
 <script src="app.js"></script>
+
+
 </body></html>
