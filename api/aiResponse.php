@@ -1,167 +1,130 @@
 <?php
 // api/aiResponse.php
-
 header('Content-Type: application/json');
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Headers: Content-Type, Authorization');
+header('Access-Control-Allow-Methods: POST, OPTIONS');
 
-// Enable local error logging
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    exit(0);
+}
+
 ini_set('display_errors', 0);
 error_reporting(E_ALL);
 
-define('GROQ_API_KEY', getenv('GROQ_API_KEY') ?: 'YOUR_GROQ_API_KEY_HERE');
-
-// Include DB Connection
-require_once __DIR__ . '/../config/db.php'; 
-
-// --- DATABASE HELPERS ---
-
-function get_messages_for_conversation($pdo, $conversation_id) {
-    if (!$conversation_id) return [];
-    
-    try {
-        $stmt = $pdo->prepare("
-            SELECT role, message_text 
-            FROM messages 
-            WHERE conversation_id = :cid 
-            ORDER BY id ASC
-        ");
-        $stmt->execute([':cid' => $conversation_id]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
-    } catch (Exception $e) {
-        error_log("DB Read Error: " . $e->getMessage());
-        return [];
-    }
-}
-
-function save_message($pdo, $conversation_id, $role, $text) {
-    try {
-        $stmt = $pdo->prepare("
-            INSERT INTO messages (conversation_id, role, message_text) 
-            VALUES (:cid, :role, :msg)
-        ");
-        return $stmt->execute([
-            ':cid'  => $conversation_id,
-            ':role' => $role,
-            ':msg'  => $text
-        ]);
-    } catch (Exception $e) {
-        error_log("DB Insert Error: " . $e->getMessage());
-        return false;
-    }
-}
-
-function create_new_conversation($pdo) {
-    try {
-        $stmt = $pdo->prepare("INSERT INTO conversations () VALUES ()");
-        $stmt->execute();
-        return $pdo->lastInsertId();
-    } catch (Exception $e) {
-        // Fallback if table requires values
-        try {
-            $stmt = $pdo->prepare("INSERT INTO conversations (id) VALUES (NULL)");
-            $stmt->execute();
-            return $pdo->lastInsertId();
-        } catch (Exception $ex) {
-            error_log("DB Conversation Create Error: " . $ex->getMessage());
-            return null;
-        }
-    }
-}
-
-// --- MAIN EXECUTION ---
-
 try {
-    // FIX 1: Correct stream reader
-    $rawInput = file_get_contents('php://input');
-    $input = json_decode($rawInput, true) ?? $_POST;
+    require_once __DIR__ . '/_config.php';
+    require_once __DIR__ . '/_db_connect.php';
+    require_once __DIR__ . '/_chat_history.php';
 
-    $prompt = trim($input['prompt'] ?? '');
+    // 1. Parse Inbound Body JSON
+    $raw_input = file_get_contents('php://input');
+    $input = json_decode($raw_input, true) ?? $_POST;
+    
+    $prompt = trim($input['prompt'] ?? ($input['message'] ?? ''));
     $conversation_id = $input['conversation_id'] ?? null;
 
     if (empty($prompt)) {
         http_response_code(400);
-        echo json_encode(['error' => 'Prompt cannot be empty.']);
+        echo json_encode(['error' => 'Prompt text string cannot be empty.']);
         exit;
     }
 
-    if (!$conversation_id) {
-        $conversation_id = create_new_conversation($pdo);
+    // 2. Validate/Create Conversation Thread
+    if (!$conversation_id || strpos((string)$conversation_id, 'temp-') === 0 || $conversation_id === 'null') {
+        $conversation_id = create_conversation('Luntian Chat Thread');
+        if (!$conversation_id) {
+            throw new Exception("Database failed to initialize a new conversation ID row.");
+        }
+    } else {
+        $conversation_id = intval($conversation_id);
     }
 
-    save_message($pdo, $conversation_id, 'user', $prompt);
+    // 3. Log Inbound User Message First
+    add_message($conversation_id, 'user', $prompt);
 
+    // 4. Construct System Base
     $model_messages = [
         [
-            'role' => 'system',
-            'content' => "You are Luntian AI, a helpful virtual assistant. Answer concisely and use standard Markdown formatting."
+            'role' => 'system', 
+            'content' => "You are Luntian AI, a helpful virtual assistant created by Percy Mic. Keep answers clean, conversational, context-aware, and precise."
         ]
     ];
 
-    $history = get_messages_for_conversation($pdo, $conversation_id);
+    // 5. Load Complete Chat History from DB & Normalize Roles for Groq API
+    $history = get_messages_for_conversation($conversation_id);
+    
+    if (is_array($history)) {
+        foreach ($history as $msg) {
+            $text = trim($msg['content'] ?? ($msg['message_text'] ?? ''));
+            $raw_role = strtolower($msg['role'] ?? 'user');
 
-    foreach ($history as $msg) {
-        $text = trim($msg['message_text'] ?? '');
-        $raw_role = strtolower($msg['role'] ?? 'user');
-        
-        $role = ($raw_role === 'assistant' || $raw_role === 'bot' || $raw_role === 'ai') 
-            ? 'assistant' 
-            : 'user';
+            // Normalize DB role names to valid Groq roles ('user' or 'assistant')
+            $role = ($raw_role === 'assistant' || $raw_role === 'bot' || $raw_role === 'ai') 
+                ? 'assistant' 
+                : 'user';
 
-        if (!empty($text)) {
-            $model_messages[] = [
-                'role' => $role,
-                'content' => $text
-            ];
+            if (!empty($text)) {
+                $model_messages[] = [
+                    'role' => $role,
+                    'content' => $text
+                ];
+            }
         }
     }
 
-    // Call Groq API
-    $api_key = trim(GROQ_API_KEY);
+    $api_key = defined('OPENAI_API_KEY') ? OPENAI_API_KEY : null;
+    if (empty($api_key)) {
+        throw new Exception("Groq system API token key is missing or undefined inside config constants.");
+    }
+
+    // 6. Send Request to Groq API
     $ch = curl_init("https://api.groq.com/openai/v1/chat/completions");
-    curl_setopt_array($ch, [
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_POST => true,
-        CURLOPT_POSTFIELDS => json_encode([
-            "model" => "openai/gpt-oss-120b",
-            "messages" => $model_messages,
-            "temperature" => 0.7
-        ]),
-        CURLOPT_CONNECTTIMEOUT => 10,
-        CURLOPT_TIMEOUT => 30,
-        CURLOPT_HTTPHEADER => [
-            'Content-Type: application/json',
-            'Authorization: Bearer ' . $api_key
-        ]
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
+        "model" => "openai/gpt-oss-120b",",
+        "messages" => $model_messages,
+        "temperature" => 0.7
+    ]));
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 25);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Content-Type: application/json',
+        'Authorization: Bearer ' . $api_key
     ]);
 
     $response = curl_exec($ch);
-    $curl_error = curl_error($ch);
     $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
 
-    if ($curl_error) {
-        throw new Exception("cURL Error: " . $curl_error);
+    if ($http_code !== 200) {
+        $error_payload = json_decode($response, true);
+        $err_msg = $error_payload['error']['message'] ?? "Server returned HTTP status code: " . $http_code;
+        throw new Exception("Groq API Error: " . $err_msg);
     }
 
-    $data = json_decode($response, true);
+    $result_data = json_decode($response, true);
+    $reply = $result_data['choices'][0]['message']['content'] ?? 'No response text generated.';
 
-    if ($http_code !== 200 || !isset($data['choices'][0]['message']['content'])) {
-        $msg = $data['error']['message'] ?? 'API Provider Failed';
-        throw new Exception("Groq API Error ({$http_code}): " . $msg);
-    }
+    // 7. Log Outbound AI Reply to DB
+    add_message($conversation_id, 'assistant', $reply);
 
-    $ai_reply = $data['choices'][0]['message']['content'];
-
-    save_message($pdo, $conversation_id, 'assistant', $ai_reply);
-
+    // 8. Return Payload to Frontend
     echo json_encode([
-        'reply' => $ai_reply,
+        'reply' => $reply,
         'conversation_id' => $conversation_id
     ]);
 
-} catch (Exception $e) {
-    http_response_code(500);
+} catch (Throwable $t) {
+    http_response_code(200); 
     echo json_encode([
-        'error' => 'Server Error',
-        'details' => $e->getMessage()
+        'error' => true,
+        'reply' => "⚠️ Engine Sync Alert: " . $t->getMessage(),
+        'debug_details' => [
+            'file' => basename($t->getFile()),
+            'line' => $t->getLine()
+        ]
     ]);
+    exit;
 }
