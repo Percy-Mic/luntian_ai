@@ -1,13 +1,19 @@
 <?php
 // api/_config.php - Luntian AI Production Configuration
 
-// 1. Securely check environment variables from Vercel's isolated environment
+// 1. Securely check and resolve environment variables from Vercel
 if (!defined('OPENAI_API_KEY')) {
-    $env_key = getenv('GROQ_API_KEY') ?: ($_ENV['GROQ_API_KEY'] ?? ($_SERVER['GROQ_API_KEY'] ?? getenv('OPENAI_API_KEY')));
-    define('OPENAI_API_KEY', $env_key);
+    $groq_key = getenv('GROQ_API_KEY') 
+        ?: ($_ENV['GROQ_API_KEY'] 
+        ?: ($_SERVER['GROQ_API_KEY'] 
+        ?: (getenv('OPENAI_API_KEY') 
+        ?: ($_ENV['OPENAI_API_KEY'] 
+        ?: ($_SERVER['OPENAI_API_KEY'] ?? '')))));
+
+    define('OPENAI_API_KEY', trim($groq_key));
 }
 
-// 2. Map Vercel System Database Keys with Comprehensive Scope Check
+// 2. Map Vercel System Database Keys
 $host = getenv('POSTGRES_HOST') ?: ($_ENV['POSTGRES_HOST'] ?? ($_SERVER['POSTGRES_HOST'] ?? ''));
 $name = getenv('POSTGRES_DATABASE') ?: ($_ENV['POSTGRES_DATABASE'] ?? ($_SERVER['POSTGRES_DATABASE'] ?? ''));
 $user = getenv('POSTGRES_USER') ?: ($_ENV['POSTGRES_USER'] ?? ($_SERVER['POSTGRES_USER'] ?? ''));
