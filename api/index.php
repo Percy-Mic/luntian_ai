@@ -266,7 +266,7 @@
 
 <div class="brand flex items-center gap-3">
 
-<svg class="flex-shrink-0" height="24" viewbox="0 0 24 24" width="24"><circle cx="12" cy="12" fill="yellowgreen" r="10"></circle><circle cx="12" cy="12" fill="sienna" r="5"></circle></svg>
+<span class="material-symbols-outlined">navigation</span>
 
 <span class="font-headline-sm text-xl text-primary dark:text-primary-fixed truncate">Luntian AI</span>
 
@@ -289,7 +289,7 @@
         </button>
 
 </div>
-
+<hr/>
 <ul class="history-list flex-1 overflow-y-auto px-2 py-4 space-y-2" id="chat-history"><!--Chat lists container--></ul>
 
 <div class="sidebar-footer p-6 border-t border-outline-variant/30 dark:border-outline/30 flex flex-col text-xs font-body-md text-on-surface-variant/70 dark:text-inverse-on-surface/70 text-center gap-1 mt-auto bg-surface-container-low dark:bg-inverse-surface"><p class="mb-1 opacity-80">© 2025 Luntian AI</p><p class="text-[10px] uppercase tracking-widest font-semibold">Created by Percy Mic P. Nono</p></div>
