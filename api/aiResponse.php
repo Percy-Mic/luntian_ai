@@ -1,8 +1,12 @@
 <?php
 // api/aiResponse.php
+
+// Prevent notices, warning prints, or accidental whitespace from corrupting JSON output
 if (ob_get_length()) ob_clean();
+
 ini_set('display_errors', 0);
 error_reporting(E_ALL);
+
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
@@ -43,10 +47,10 @@ try {
         error_log("Database warning: Could not write user prompt to table.");
     }
 
-    // 4. Construct AI System Message Array Stack (FIXED SYNTAX HERE)
+    // 4. Construct AI System Message Array Stack
     $model_messages = [
         [
-            'role' => 'system', 
+            'role' => 'system',
             'content' => "You are Luntian AI, a helpful virtual assistant created by Percy Mic. Keep answers clean, conversational, and precise. IMPORTANT FORMATTING RULES: Never wrap full code examples or hello world programs inside Markdown tables. Always provide code blocks using standard ``` language tags outside of tables to preserve mobile readability."
         ]
     ];
@@ -80,7 +84,7 @@ try {
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
-        "model" => "llama-3.3-70b-versatile", // FIXED: Updated to standard Groq model
+        "model" => "llama-3.3-70b-versatile",
         "messages" => $model_messages
     ]));
     curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
@@ -107,16 +111,20 @@ try {
     add_message($conversation_id, 'assistant', $reply);
 
     // Return payload format matching app.js expectations
+    if (ob_get_length()) ob_clean();
     echo json_encode([
         'reply' => $reply,
         'conversation_id' => $conversation_id
     ]);
+    exit;
 
 } catch (Throwable $t) {
-    http_response_code(200); 
+    if (ob_get_length()) ob_clean();
+    http_response_code(200);
     echo json_encode([
         'error' => true,
         'reply' => "⚠️ Engine Sync Alert: " . $t->getMessage(),
+        'conversation_id' => $conversation_id ?? null,
         'debug_details' => [
             'file' => basename($t->getFile()),
             'line' => $t->getLine()
