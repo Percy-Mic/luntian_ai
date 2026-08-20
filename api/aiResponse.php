@@ -35,7 +35,7 @@ try {
     }
 
     // 3. Handle Conversation Persistence
-    if (!$conversation_id || strpos($conversation_id, 'temp-') === 0 || $conversation_id === 'null') {
+    if (!$conversation_id || strpos((string)$conversation_id, 'temp-') === 0 || $conversation_id === 'null') {
         $conversation_id = create_conversation('Luntian Chat Thread');
         if (!$conversation_id) {
             throw new Exception("Database failed to initialize a new conversation ID row.");
@@ -44,58 +44,38 @@ try {
         $conversation_id = intval($conversation_id);
     }
 
-    // 4. Base System Instruction Stack
+    // 4. STEP 1: Save the current user message to DB FIRST
+    add_message($conversation_id, 'user', $prompt);
+
+    // 5. STEP 2: Fetch the FULL updated conversation history from DB
+    $history = get_messages_for_conversation($conversation_id); 
+
+    // 6. Construct AI Payload with Base System Instructions
     $model_messages = [
         [
             'role' => 'system',
-            'content' => "You are Luntian AI, a helpful virtual assistant created by Percy Mic. Keep answers clean, conversational, and precise."
+            'content' => "You are Luntian AI, a helpful virtual assistant created by Percy Mic. Keep responses context-aware, precise, and natural. Maintain complete awareness of all prior dialogue turns."
         ]
     ];
 
-    // 1. Initialize system prompt
-$model_messages = [
-    [
-        'role' => 'system',
-        'content' => "You are Luntian AI, a helpful virtual assistant created by Percy Mic. Keep responses context-aware and natural."
-    ]
-];
+    if (!empty($history) && is_array($history)) {
+        foreach ($history as $msg) {
+            $text = $msg['message_text'] ?? ($msg['content'] ?? '');
+            
+            // Normalize DB roles to strict Groq expectations ('user' or 'assistant')
+            $raw_role = strtolower($msg['role'] ?? 'user');
+            $role = ($raw_role === 'bot' || $raw_role === 'assistant' || $raw_role === 'ai') 
+                ? 'assistant' 
+                : 'user';
 
-// 2. Fetch past conversation messages from DB
-$history = get_messages_for_conversation($conversation_id); 
-
-if (!empty($history) && is_array($history)) {
-    foreach ($history as $msg) {
-        $text = $msg['message_text'] ?? ($msg['content'] ?? '');
-        
-        // Normalize DB role to valid Groq roles ('user' or 'assistant')
-        $raw_role = strtolower($msg['role'] ?? 'user');
-        $role = ($raw_role === 'bot' || $raw_role === 'assistant' || $raw_role === 'ai') 
-            ? 'assistant' 
-            : 'user';
-
-        if (!empty(trim($text))) {
-            $model_messages[] = [
-                'role' => $role,
-                'content' => $text
-            ];
+            if (!empty(trim($text))) {
+                $model_messages[] = [
+                    'role' => $role,
+                    'content' => $text
+                ];
+            }
         }
     }
-}
-
-// 3. Append current user prompt if not already present as the last message
-$last_msg = end($model_messages);
-if (!$last_msg || $last_msg['content'] !== $prompt || $last_msg['role'] !== 'user') {
-    $model_messages[] = [
-        'role' => 'user',
-        'content' => $prompt
-    ];
-}
-    // 6. Append Incoming Prompt to DB and Payload Stack
-    add_message($conversation_id, 'user', $prompt);
-    $model_messages[] = [
-        'role' => 'user',
-        'content' => $prompt
-    ];
 
     // 7. Verify API Key
     $api_key = defined('OPENAI_API_KEY') ? OPENAI_API_KEY : (getenv('OPENAI_API_KEY') ?: null);
