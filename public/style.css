@@ -71,7 +71,7 @@
 /* The Copy Button */
 .copy-btn {
     background: transparent;
-    border: 1px solid green;
+    border: 1px solid pink;
     cursor: pointer;
     font-size: 12px;
     padding: 4px 8px;
