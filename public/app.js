@@ -34,10 +34,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const li = document.createElement('li');
             li.className = `chat-item ${chat.id == currentChatId ? 'active' : ''}`;
             li.innerHTML = `
-                <span class="chat-title" title="Double-click to rename">${chat.title}</span><p> || </p>
+                <span class="chat-title" title="Double-click to rename">${chat.title} ||  </span>
                 <button class="delete-btn" data-index="${i}">
                     <img src="/assets/icons/delete-svgrepo-com.svg" width="20px">
                 </button>
+                <hr/>
             `;
             const titleSpan = li.querySelector('.chat-title');
             titleSpan.onclick = () => loadChat(i);
