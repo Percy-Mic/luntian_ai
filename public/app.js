@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
             li.innerHTML = `
                 <span class="chat-title" title="Double-click to rename">${chat.title}    </span>
                 <button class="delete-btn" data-index="${i}">
-                    <span class="material-symbols-outlined">trash_can</span>
+                    <span class="material-symbols-outlined">trash</span>
                 </button>
                 <hr/>
             `;
