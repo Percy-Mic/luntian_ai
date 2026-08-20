@@ -75,7 +75,6 @@ document.addEventListener('DOMContentLoaded', () => {
         contentDiv.className = 'message-content';
 
         if (role === 'assistant' && typeof marked !== 'undefined') {
-            // Enable breaks globally right before parsing to keep formatting intact
             marked.setOptions({
                 breaks: true,
                 gfm: true
@@ -124,43 +123,63 @@ document.addEventListener('DOMContentLoaded', () => {
     async function sendMessage() {
         const text = userInput.value.trim();
         if (!text) return;
+
         window.speechSynthesis.cancel(); 
         if(stopSpeechBtn) stopSpeechBtn.style.display = 'none';
+        
         userInput.value = '';
         userInput.style.height = 'auto';
+
         const activeChat = chats.find(c => c.id == currentChatId);
+        if (!activeChat) return;
+
+        // Auto-rename chat title on first message
+        if (activeChat.messages.length === 0) {
+            activeChat.title = text.length > 25 ? text.substring(0, 25) + '...' : text;
+        }
+
         activeChat.messages.push({ role: 'user', text: text });
         appendMessageDOM('user', text);
         showTyping(true);
 
         try {
-            const res = await fetch('/api/aiResponse', {
+            const res = await fetch('/api/aiResponse.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: "include",
                 body: JSON.stringify({ prompt: text, conversation_id: currentChatId })
             });
 
-            if (!res.ok) {
-                throw new Error(`Server status returned ${res.status}`);
+            const rawText = await res.text();
+            showTyping(false);
+
+            if (!rawText.trim()) {
+                throw new Error("Received an empty response payload from server.");
             }
 
-            const data = await res.json();
-            showTyping(false);
-            
+            let data;
+            try {
+                data = JSON.parse(rawText);
+            } catch (pErr) {
+                throw new Error("Server returned non-JSON data output.");
+            }
+
             if (data.reply) {
-                if (!currentChatId || currentChatId == 'temp') {
-                    activeChat.id = data.conversation_id;
+                // Update temporary ID with database ID
+                if (data.conversation_id && (String(currentChatId).startsWith('temp-') || !currentChatId)) {
                     currentChatId = data.conversation_id;
+                    activeChat.id = data.conversation_id;
                 }
+
                 activeChat.messages.push({ role: 'assistant', text: data.reply });
                 appendMessageDOM('assistant', data.reply);
+                
                 const cleanText = data.reply.replace(/<[^>]*>?/gm, '').replace(/[`#*]/g, '');
                 speakText(cleanText);
                 saveToStorage();
                 renderHistory();
             } else if (data.error) {
-                appendMessageDOM('assistant', `⚠️ Error from server: ${data.error}`);
+                appendMessageDOM('assistant', `⚠️ Error from server: ${typeof data.error === 'string' ? data.error : 'Execution Exception'}`);
             }
         } catch (err) {
             showTyping(false);
@@ -285,9 +304,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if ('speechSynthesis' in window) {
             window.speechSynthesis.cancel(); 
             const utter = new SpeechSynthesisUtterance(text);
-            
             utter.lang = 'en-US'; 
-            
             utter.onstart = () => { if(stopSpeechBtn) stopSpeechBtn.style.display = 'flex'; };
             utter.onend = () => { if(stopSpeechBtn) stopSpeechBtn.style.display = 'none'; };
             utter.onerror = () => { if(stopSpeechBtn) stopSpeechBtn.style.display = 'none'; };
