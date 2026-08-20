@@ -27,10 +27,9 @@ function create_conversation($title = 'Luntian Chat Thread') {
 function get_messages_for_conversation($conversation_id) {
     global $pdo;
     try {
-        // Query ordered strictly by id ASC to preserve exact conversation sequence
+        // Direct query on message_text without referencing non-existent 'content' column
         $stmt = $pdo->prepare("
-            SELECT role, 
-                   COALESCE(message_text, content, '') AS message_text 
+            SELECT role, message_text 
             FROM messages 
             WHERE conversation_id = :conversation_id 
             ORDER BY id ASC
@@ -42,15 +41,18 @@ function get_messages_for_conversation($conversation_id) {
         
         if ($rows) {
             foreach ($rows as $row) {
-                // Ensure valid OpenAI/Groq roles
-                $raw_role = strtolower(trim($row['role']));
-                $role = ($raw_role === 'assistant' || $raw_role === 'model' || $raw_role === 'bot') ? 'assistant' : 'user';
+                $raw_role = strtolower(trim($row['role'] ?? 'user'));
+                $role = ($raw_role === 'assistant' || $raw_role === 'model' || $raw_role === 'bot') 
+                    ? 'assistant' 
+                    : 'user';
 
-                if (!empty($row['message_text'])) {
+                $text = trim($row['message_text'] ?? '');
+
+                if ($text !== '') {
                     $messages[] = [
-                        'role'    => $role,
-                        'content' => $row['message_text'],
-                        'message_text' => $row['message_text'] // Duplicate key for backward compatibility
+                        'role' => $role,
+                        'content' => $text,
+                        'message_text' => $text
                     ];
                 }
             }
@@ -62,7 +64,6 @@ function get_messages_for_conversation($conversation_id) {
         return [];
     }
 }
-
 /**
  * Appends a new chat log entry using primary column 'message_text' and fallback column 'content'.
  */
