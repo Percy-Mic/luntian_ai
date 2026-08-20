@@ -49,7 +49,7 @@ try {
 
     // 4. Construct AI System Message Array Stack
     $model_messages = [
-        ['role' => 'system', 'content' => "You are Luntian AI, a helpful virtual assistant created by Percy Mic. Keep answers clean, conversational, and precise."]
+        ['role' => 'system', 'content' => "You are Luntian AI, a helpful virtual assistant created by Percy Mic. Keep answers clean, conversational, and precise. Keep answers clean, conversational, and precise. IMPORTANT FORMATTING RULES: Never wrap full code examples or hello world programs inside Markdown tables. Always provide code blocks using standard ``` language tags outside of tables to preserve mobile readability."
     ];
 
     // Load history records matching table layout
