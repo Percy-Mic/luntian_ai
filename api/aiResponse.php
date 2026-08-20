@@ -32,8 +32,8 @@ try {
         exit;
     }
 
-    // Validate/Create Conversation
-    if (!$conversation_id || strpos((string)$conversation_id, 'temp-') === 0 || $conversation_id === 'null') {
+    // 1. Validate / Create Conversation ID
+    if (!$conversation_id || strpos((string)$conversation_id, 'temp-') === 0 || $conversation_id === 'null' || $conversation_id === 0) {
         $conversation_id = create_conversation('Luntian Chat Thread');
         if (!$conversation_id) {
             throw new Exception("Database failed to initialize a new conversation ID row.");
@@ -42,10 +42,7 @@ try {
         $conversation_id = intval($conversation_id);
     }
 
-    // Save User Prompt
-    add_message($conversation_id, 'user', $prompt);
-
-    // System Prompt
+    // 2. Load Existing Conversation History FIRST (Before adding current user prompt)
     $model_messages = [
         [
             'role' => 'system', 
@@ -53,7 +50,6 @@ try {
         ]
     ];
 
-    // Load History
     $history = get_messages_for_conversation($conversation_id);
     if (is_array($history)) {
         foreach ($history as $msg) {
@@ -70,12 +66,18 @@ try {
         }
     }
 
+    // 3. Append Current User Prompt to Request Payload
+    $model_messages[] = ['role' => 'user', 'content' => $prompt];
+
+    // 4. Store Current User Message in Database
+    add_message($conversation_id, 'user', $prompt);
+
     $api_key = defined('OPENAI_API_KEY') ? OPENAI_API_KEY : null;
     if (empty($api_key)) {
         throw new Exception("Groq API token key is missing or undefined inside config constants.");
     }
 
-    // Send Request to Groq API
+    // 5. Send Request to Groq API
     $ch = curl_init("https://api.groq.com/openai/v1/chat/completions");
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
@@ -106,10 +108,10 @@ try {
     $result_data = json_decode($response, true);
     $reply = $result_data['choices'][0]['message']['content'] ?? 'No response text generated.';
 
-    // Save Assistant Response
+    // 6. Save Assistant Response in Database
     add_message($conversation_id, 'assistant', $reply);
 
-    // Wipe any unexpected warnings before sending clean JSON
+    // Wipe any output buffer warnings before returning clean JSON
     ob_clean();
     echo json_encode([
         'reply' => $reply,
