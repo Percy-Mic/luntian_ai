@@ -52,33 +52,50 @@ try {
         ]
     ];
 
-    // 5. Load History Records (Checks both message_text and content keys)
-    $history = get_messages_for_conversation($conversation_id);
+    // 1. Initialize system prompt
+$model_messages = [
+    [
+        'role' => 'system',
+        'content' => "You are Luntian AI, a helpful virtual assistant created by Percy Mic. Keep responses context-aware and natural."
+    ]
+];
 
-    if (is_array($history)) {
-        foreach ($history as $msg) {
-            // Support both standard DB field names
-            $text = $msg['message_text'] ?? ($msg['content'] ?? '');
-            
-            // Map role accurately for OpenAI API standard ('user' vs 'assistant')
-            $raw_role = strtolower($msg['role'] ?? 'user');
-            $role = ($raw_role === 'assistant' || $raw_role === 'model' || $raw_role === 'bot') ? 'assistant' : 'user';
+// 2. Fetch past conversation messages from DB
+$history = get_messages_for_conversation($conversation_id); 
 
-            if (!empty($text)) {
-                $model_messages[] = [
-                    'role' => $role,
-                    'content' => $text
-                ];
-            }
+if (!empty($history) && is_array($history)) {
+    foreach ($history as $msg) {
+        $text = $msg['message_text'] ?? ($msg['content'] ?? '');
+        
+        // Normalize DB role to valid Groq roles ('user' or 'assistant')
+        $raw_role = strtolower($msg['role'] ?? 'user');
+        $role = ($raw_role === 'bot' || $raw_role === 'assistant' || $raw_role === 'ai') 
+            ? 'assistant' 
+            : 'user';
+
+        if (!empty(trim($text))) {
+            $model_messages[] = [
+                'role' => $role,
+                'content' => $text
+            ];
         }
     }
+}
 
-    // 6. Append Incoming Prompt to DB and Payload Stack
-    add_message($conversation_id, 'user', $prompt);
+// 3. Append current user prompt if not already present as the last message
+$last_msg = end($model_messages);
+if (!$last_msg || $last_msg['content'] !== $prompt || $last_msg['role'] !== 'user') {
     $model_messages[] = [
         'role' => 'user',
         'content' => $prompt
     ];
+}
+    /*// 6. Append Incoming Prompt to DB and Payload Stack
+    add_message($conversation_id, 'user', $prompt);
+    $model_messages[] = [
+        'role' => 'user',
+        'content' => $prompt
+    ];*/
 
     // 7. Verify API Key
     $api_key = defined('OPENAI_API_KEY') ? OPENAI_API_KEY : (getenv('OPENAI_API_KEY') ?: null);
