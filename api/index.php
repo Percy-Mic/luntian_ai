@@ -1,10 +1,12 @@
-<!DOCTYPE html><html class="light" lang="en"><head>
-<meta charset="utf-8">
-<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Luntian Assistant</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&amp;family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&amp;family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <script id="tailwind-config">
     tailwind.config = {
       darkMode: "class",
@@ -123,14 +125,14 @@
   </style>
 <script src="marked.min.js"></script>
 </head>
-<body class="bg-background text-on-background font-body-md h-screen overflow-hidden flex selection:bg-primary-container selection:text-on-primary-container dark:bg-inverse-surface dark:text-inverse-on-surface">
+<body class="bg-background text-on-background font-body-md h-screen overflow-hidden flex selection:bg-primary-container selection:text-on-primary-container dark:bg-inverse-surface dark:text-inverse-on-surface overflow-x-hidden">
 <div class="app-container flex w-full h-full relative">
 <!-- Overlay for mobile drawer -->
 <div class="fixed inset-0 bg-on-background/20 z-40 hidden md:hidden backdrop-blur-sm transition-opacity duration-300 opacity-0" id="drawer-overlay"></div>
-<aside class="sidebar fixed inset-y-0 left-0 z-50 w-[280px] bg-surface-container-low dark:bg-inverse-surface border-r border-outline-variant/30 dark:border-outline/30 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col md:relative md:flex shadow-lg font-headline-sm" id="drawer"><!--The sidebar-->
-<div class="sidebar-header p-6 flex items-center justify-between border-b border-outline-variant/30 dark:border-outline/30 font-headline-sm"><!--The side bar header-->
+<aside class="sidebar fixed inset-y-0 left-0 z-50 w-[280px] bg-surface-container-low dark:bg-inverse-surface border-r border-outline-variant/30 dark:border-outline/30 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col md:relative md:flex font-headline-sm shadow-sm" id="drawer"><!--The sidebar-->
+<div class="sidebar-header flex items-center justify-between border-b border-outline-variant/30 dark:border-outline/30 font-headline-sm px-6 py-4"><!--The side bar header-->
 <div class="brand flex items-center gap-3">
-<svg class="flex-shrink-0" height="24" viewBox="0 0 24 24" width="24"><circle cx="12" cy="12" fill="yellowgreen" r="10"></circle><circle cx="12" cy="12" fill="sienna" r="5"></circle></svg>
+<svg class="flex-shrink-0" height="24" viewbox="0 0 24 24" width="24"><circle cx="12" cy="12" fill="yellowgreen" r="10"></circle><circle cx="12" cy="12" fill="sienna" r="5"></circle></svg>
 <span class="font-headline-sm text-xl text-primary dark:text-primary-fixed truncate">Luntian AI</span>
 </div>
 <button class="md:hidden p-2 rounded-xl hover:bg-surface-container-highest dark:hover:bg-on-secondary-fixed text-on-surface-variant dark:text-inverse-on-surface" id="close-drawer">
@@ -156,12 +158,12 @@
 </div>
 <button class="p-2 rounded-xl hover:bg-surface-container dark:hover:bg-on-secondary-fixed transition-colors text-primary dark:text-primary-fixed" id="theme-toggle" title="Toggle Theme"><span class="material-symbols-outlined dark:hidden text-[18px]">dark_mode</span><span class="material-symbols-outlined hidden dark:block text-[18px]">light_mode</span></button>
 </div>
-<section class="chat-box flex-1 overflow-y-auto p-4 md:p-8 pb-32 scroll-smooth flex flex-col gap-4 h-full" id="chat-box">
+<section class="chat-box flex-1 overflow-y-auto p-4 md:p-8 pb-32 scroll-smooth flex flex-col gap-4 h-full overflow-x-hidden" id="chat-box">
 <!-- Simulated messages for visual representation of alignment -->
-<div class="max-w-[85%] sm:max-w-[75%] p-4 rounded-2xl shadow-sm bg-primary text-white self-end">
+<div class="message-user max-w-[85%] sm:max-w-[75%] p-4 rounded-2xl shadow-sm bg-primary text-white self-end break-words">
 <p class="">Hello! Can you help me with a design?</p>
 </div>
-<div class="max-w-[85%] sm:max-w-[75%] p-4 rounded-2xl shadow-sm bg-surface-container-high dark:bg-on-secondary-fixed border border-outline-variant/20 dark:border-outline/20">
+<div class="message-ai max-w-[85%] sm:max-w-[75%] p-4 rounded-2xl shadow-sm bg-surface-container-high dark:bg-on-secondary-fixed border border-outline-variant/20 dark:border-outline/20 break-words">
 <p class="">Of course! I can help you create a beautiful design using the Serene Violet palette. What are you looking to build?</p>
 </div>
 </section><!--Chat container-->
@@ -251,6 +253,4 @@
     }
   </script>
 <script src="app.js"></script>
-
-
 </body></html>
