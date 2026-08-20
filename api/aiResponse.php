@@ -1,7 +1,7 @@
 <?php
 // api/aiResponse.php
 
-// Clean any accidental whitespace or warnings before sending JSON
+// 1. Prevent buffer artifacts or notices from ruining JSON output
 if (ob_get_length()) ob_clean();
 
 ini_set('display_errors', 0);
@@ -21,10 +21,12 @@ try {
     require_once __DIR__ . '/_db_connect.php';
     require_once __DIR__ . '/_chat_history.php';
 
-    // 1. Parse Inbound Body JSON Safely
-    $raw_input = file_get_contents('php://input');$input = json_decode($raw_input, true) ?? $_POST;
+    // 2. Parse Inbound Request Data
+    $raw_input = file_get_contents('php://input');
+    $input = json_decode($raw_input, true) ?? $_POST;
     
-    $prompt = trim($input['prompt'] ?? ($input['message'] ?? ''));$conversation_id = isset($input['conversation_id']) ?$input['conversation_id'] : null;
+    $prompt = trim($input['prompt'] ?? ($input['message'] ?? ''));
+    $conversation_id = isset($input['conversation_id']) ? $input['conversation_id'] : null;
 
     if (empty($prompt)) {
         http_response_code(400);
@@ -32,8 +34,9 @@ try {
         exit;
     }
 
-    // 2. Validate/Create Conversation Thread safely
-    if (!$conversation_id \vert{}\vert{} strpos($conversation_id, 'temp-') === 0 || $conversation_id === 'null') {$conversation_id = create_conversation('Luntian Chat Thread');
+    // 3. Handle Conversation Persistence
+    if (!$conversation_id || strpos($conversation_id, 'temp-') === 0 || $conversation_id === 'null') {
+        $conversation_id = create_conversation('Luntian Chat Thread');
         if (!$conversation_id) {
             throw new Exception("Database failed to initialize a new conversation ID row.");
         }
@@ -41,49 +44,50 @@ try {
         $conversation_id = intval($conversation_id);
     }
 
-    // 3. Log Inbound Prompt into Messages Table
-    $saved_user_msg = add_message($conversation_id, 'user',$prompt);
-    if (!$saved_user_msg) {
-        error_log("Database warning: Could not write user prompt to table.");
-    }
-
-    // 4. Construct AI System Message Array Stack
+    // 4. Base System Instruction Stack
     $model_messages = [
         [
             'role' => 'system',
-            'content' => "You are Luntian AI, a helpful virtual assistant created by Percy Mic. Keep answers clean, conversational, and precise. IMPORTANT FORMATTING RULES: Always output full code blocks using standard ``` language tags outside of tables."
+            'content' => "You are Luntian AI, a helpful virtual assistant created by Percy Mic. Keep answers clean, conversational, and precise."
         ]
     ];
 
-    // Load history matching table layout records safely with valid role fallbacks
+    // 5. Load History Records (Checks both message_text and content keys)
     $history = get_messages_for_conversation($conversation_id);
+
     if (is_array($history)) {
         foreach ($history as $msg) {
+            // Support both standard DB field names
             $text = $msg['message_text'] ?? ($msg['content'] ?? '');
             
-            // Map DB roles strictly to valid API roles ('user' or 'assistant')
+            // Map role accurately for OpenAI API standard ('user' vs 'assistant')
             $raw_role = strtolower($msg['role'] ?? 'user');
             $role = ($raw_role === 'assistant' || $raw_role === 'model' || $raw_role === 'bot') ? 'assistant' : 'user';
 
             if (!empty($text)) {
-                $model_messages[] = ['role' => $role, 'content' => $text];
+                $model_messages[] = [
+                    'role' => $role,
+                    'content' => $text
+                ];
             }
         }
     }
 
-    // Ensure the incoming prompt is present at the end of the stack without duplicating
-    $last_msg = end($model_messages);
-    if (!$last_msg || $last_msg['content'] !== $prompt || $last_msg['role'] !== 'user') {
-        $model_messages[] = ['role' => 'user', 'content' => $prompt];
-    }
+    // 6. Append Incoming Prompt to DB and Payload Stack
+    add_message($conversation_id, 'user', $prompt);
+    $model_messages[] = [
+        'role' => 'user',
+        'content' => $prompt
+    ];
 
+    // 7. Verify API Key
     $api_key = defined('OPENAI_API_KEY') ? OPENAI_API_KEY : (getenv('OPENAI_API_KEY') ?: null);
     if (empty($api_key)) {
         throw new Exception("Groq system API token key is missing or undefined inside config constants.");
     }
 
-    // 5. Send Payload Package to Verified Groq API Link
-    $ch = curl_init("[https://api.groq.com/openai/v1/chat/completions](https://api.groq.com/openai/v1/chat/completions)");
+    // 8. Execute Request to Groq Endpoint
+    $ch = curl_init("https://api.groq.com/openai/v1/chat/completions");
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
@@ -110,10 +114,10 @@ try {
     $result_data = json_decode($response, true);
     $reply = $result_data['choices'][0]['message']['content'] ?? 'No response text generated.';
 
-    // 6. Log Outbound AI Reply to Database
+    // 9. Save Assistant Response to Database
     add_message($conversation_id, 'assistant', $reply);
 
-    // Return payload format matching app.js expectations
+    // 10. Clean Return Payload
     if (ob_get_length()) ob_clean();
     echo json_encode([
         'reply' => $reply,
