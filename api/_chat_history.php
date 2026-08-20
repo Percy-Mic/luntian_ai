@@ -8,13 +8,25 @@ if (!isset($pdo)) {
 /**
  * Creates a new conversation thread in the database.
  */
-function create_conversation($title = 'New Chat') {
+/*function create_conversation($title = 'New Chat') {
     global $pdo;
     try {
         $stmt = $pdo->prepare("INSERT INTO conversations (title, created_at) VALUES (:title, NOW()) RETURNING id");
         $stmt->execute([':title' => $title]);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         return $result ? $result['id'] : null;
+    } catch (Exception $e) {
+        error_log("Failed to create conversation: " . $e->getMessage());
+        return null;
+    }
+}*/
+
+function create_conversation($title = 'Luntian Chat Thread') {
+    global $pdo;
+    try {
+        $stmt = $pdo->prepare("INSERT INTO conversations (title) VALUES (:title) RETURNING id");
+        $stmt->execute([':title' => $title]);
+        return $stmt->fetchColumn(); // Retrieves the newly generated SERIAL id directly
     } catch (Exception $e) {
         error_log("Failed to create conversation: " . $e->getMessage());
         return null;
