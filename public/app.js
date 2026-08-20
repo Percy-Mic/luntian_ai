@@ -36,8 +36,9 @@ document.addEventListener('DOMContentLoaded', () => {
             li.innerHTML = `
                 <span class="chat-title" title="Double-click to rename">${chat.title}    </span>
                 <button class="delete-btn" data-index="${i}">
-                    <span class="material-symbols-outlined">trash</span>
+                    <span class="material-symbols-outlined">delete_forever</span>
                 </button>
+                <br/>
                 <hr/>
             `;
             const titleSpan = li.querySelector('.chat-title');
