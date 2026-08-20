@@ -34,9 +34,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const li = document.createElement('li');
             li.className = `chat-item ${chat.id == currentChatId ? 'active' : ''}`;
             li.innerHTML = `
-                <span class="chat-title" title="Double-click to rename">${chat.title} ||  </span>
+                <span class="chat-title" title="Double-click to rename">${chat.title}    </span>
                 <button class="delete-btn" data-index="${i}">
-                    <img src="/assets/icons/delete-svgrepo-com.svg" width="20px">
+                    <span class="material-symbols-outlined">trash_can</span>
                 </button>
                 <hr/>
             `;
