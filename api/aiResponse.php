@@ -121,7 +121,7 @@ try {
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_POST => true,
         CURLOPT_POSTFIELDS => json_encode([
-            "model" => "llama-3.3-70b-versatile",
+            "model" => "openai/gpt-oss-120b",
             "messages" => $model_messages,
             "temperature" => 0.7
         ]),
