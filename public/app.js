@@ -122,52 +122,66 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function sendMessage() {
-        const text = userInput.value.trim();
-        if (!text) return;
-        window.speechSynthesis.cancel(); 
-        if(stopSpeechBtn) stopSpeechBtn.style.display = 'none';
-        userInput.value = '';
-        userInput.style.height = 'auto';
-        const activeChat = chats.find(c => c.id == currentChatId);
-        activeChat.messages.push({ role: 'user', text: text });
-        appendMessageDOM('user', text);
-        showTyping(true);
+    const text = userInput.value.trim();
+    if (!text) return;
 
-        try {
-            const res = await fetch('/api/aiResponse', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: "include",
-                body: JSON.stringify({ prompt: text, conversation_id: currentChatId })
-            });
+    window.speechSynthesis.cancel(); 
+    if(stopSpeechBtn) stopSpeechBtn.style.display = 'none';
+    userInput.value = '';
+    userInput.style.height = 'auto';
 
-            if (!res.ok) {
-                throw new Error(`Server status returned ${res.status}`);
-            }
+    const activeChat = chats.find(c => c.id == currentChatId);
+    activeChat.messages.push({ role: 'user', text: text });
+    appendMessageDOM('user', text);
+    showTyping(true);
 
-            const data = await res.json();
-            showTyping(false);
-            
-            if (data.reply) {
-                if (!currentChatId || currentChatId == 'temp') {
-                    activeChat.id = data.conversation_id;
-                    currentChatId = data.conversation_id;
-                }
-                activeChat.messages.push({ role: 'assistant', text: data.reply });
-                appendMessageDOM('assistant', data.reply);
-                const cleanText = data.reply.replace(/<[^>]*>?/gm, '').replace(/[`#*]/g, '');
-                speakText(cleanText);
-                saveToStorage();
-                renderHistory();
-            } else if (data.error) {
-                appendMessageDOM('assistant', `⚠️ Error from server: ${data.error}`);
-            }
-        } catch (err) {
-            showTyping(false);
-            console.error("API Fetch Error:", err);
-            appendMessageDOM('assistant', `⚠️ Connection lost or error processing request (${err.message}).`);
+    try {
+        const res = await fetch('/api/aiResponse', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: "include",
+            body: JSON.stringify({ prompt: text, conversation_id: currentChatId })
+        });
+
+        // Get response as raw text first
+        const rawText = await res.text();
+
+        if (!res.ok) {
+            console.error("Backend raw error payload:", rawText);
+            throw new Error(`Server status returned ${res.status}`);
         }
+
+        // Try parsing JSON safely
+        let data;
+        try {
+            data = JSON.parse(rawText);
+        } catch (jsonErr) {
+            console.error("Received non-JSON output from backend:", rawText);
+            throw new Error("Server returned invalid JSON format.");
+        }
+
+        showTyping(false);
+        
+        if (data.reply) {
+            if (!currentChatId || currentChatId == 'temp') {
+                activeChat.id = data.conversation_id;
+                currentChatId = data.conversation_id;
+            }
+            activeChat.messages.push({ role: 'assistant', text: data.reply });
+            appendMessageDOM('assistant', data.reply);
+            const cleanText = data.reply.replace(/<[^>]*>?/gm, '').replace(/[`#*]/g, '');
+            speakText(cleanText);
+            saveToStorage();
+            renderHistory();
+        } else if (data.error) {
+            appendMessageDOM('assistant', `⚠️ Error from server: ${data.error}`);
+        }
+    } catch (err) {
+        showTyping(false);
+        console.error("API Fetch Error:", err);
+        appendMessageDOM('assistant', `⚠️ Connection lost or error processing request (${err.message}).`);
     }
+}
 
     // ===== SPEECH TO TEXT (STT) =====
     const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
