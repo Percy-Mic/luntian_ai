@@ -42,7 +42,7 @@ try {
         $conversation_id = intval($conversation_id);
     }
 
-    // 2. Load Existing Conversation History FIRST (Before adding current user prompt)
+    // 1. Fetch existing conversation history first
     $model_messages = [
         [
             'role' => 'system', 
@@ -51,25 +51,19 @@ try {
     ];
 
     $history = get_messages_for_conversation($conversation_id);
-    if (is_array($history)) {
+    if (!empty($history) && is_array($history)) {
         foreach ($history as $msg) {
-            $text = trim($msg['content'] ?? ($msg['message_text'] ?? ''));
-            $raw_role = strtolower($msg['role'] ?? 'user');
-
-            $role = ($raw_role === 'assistant' || $raw_role === 'bot' || $raw_role === 'ai') 
-                ? 'assistant' 
-                : 'user';
-
-            if (!empty($text)) {
-                $model_messages[] = ['role' => $role, 'content' => $text];
-            }
+            $model_messages[] = [
+                'role' => $msg['role'], 
+                'content' => $msg['content']
+            ];
         }
     }
 
-    // 3. Append Current User Prompt to Request Payload
+    // 2. Append incoming prompt
     $model_messages[] = ['role' => 'user', 'content' => $prompt];
 
-    // 4. Store Current User Message in Database
+    // 3. Save new message to DB
     add_message($conversation_id, 'user', $prompt);
 
     $api_key = defined('OPENAI_API_KEY') ? OPENAI_API_KEY : null;
