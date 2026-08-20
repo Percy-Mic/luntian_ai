@@ -130,10 +130,12 @@ document.addEventListener('DOMContentLoaded', () => {
         userInput.value = '';
         userInput.style.height = 'auto';
 
-        const activeChat = chats.find(c => c.id == currentChatId);
+        let activeIndex = chats.findIndex(c => c.id == currentChatId);
+        if (activeIndex === -1) activeIndex = 0;
+        
+        const activeChat = chats[activeIndex];
         if (!activeChat) return;
 
-        // Auto-rename chat title on first message
         if (activeChat.messages.length === 0) {
             activeChat.title = text.length > 25 ? text.substring(0, 25) + '...' : text;
         }
@@ -147,7 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: "include",
-                body: JSON.stringify({ prompt: text, conversation_id: currentChatId })
+                body: JSON.stringify({ prompt: text, conversation_id: activeChat.id })
             });
 
             const rawText = await res.text();
@@ -165,10 +167,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             if (data.reply) {
-                // Update temporary ID with database ID
-                if (data.conversation_id && (String(currentChatId).startsWith('temp-') || !currentChatId)) {
-                    currentChatId = data.conversation_id;
+                if (data.conversation_id) {
                     activeChat.id = data.conversation_id;
+                    currentChatId = data.conversation_id;
                 }
 
                 activeChat.messages.push({ role: 'assistant', text: data.reply });
@@ -176,6 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 const cleanText = data.reply.replace(/<[^>]*>?/gm, '').replace(/[`#*]/g, '');
                 speakText(cleanText);
+                
                 saveToStorage();
                 renderHistory();
             } else if (data.error) {
