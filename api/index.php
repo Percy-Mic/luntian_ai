@@ -129,8 +129,8 @@
 <div class="app-container flex w-full h-full relative">
 <!-- Overlay for mobile drawer -->
 <div class="fixed inset-0 bg-on-background/20 z-40 hidden md:hidden backdrop-blur-sm transition-opacity duration-300 opacity-0" id="drawer-overlay"></div>
-<aside class="sidebar fixed inset-y-0 left-0 z-50 w-[280px] bg-surface-container-low dark:bg-inverse-surface border-r border-outline-variant/30 dark:border-outline/30 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col md:relative md:flex shadow-lg" id="drawer"><!--The sidebar-->
-<div class="sidebar-header p-6 flex items-center justify-between border-b border-outline-variant/30 dark:border-outline/30"><!--The side bar header-->
+<aside class="sidebar fixed inset-y-0 left-0 z-50 w-[280px] bg-surface-container-low dark:bg-inverse-surface border-r border-outline-variant/30 dark:border-outline/30 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col md:relative md:flex shadow-lg font-headline-sm" id="drawer"><!--The sidebar-->
+<div class="sidebar-header p-6 flex items-center justify-between border-b border-outline-variant/30 dark:border-outline/30 font-headline-sm"><!--The side bar header-->
 <div class="brand flex items-center gap-3">
 <svg class="flex-shrink-0" height="24" viewbox="0 0 24 24" width="24"><circle cx="12" cy="12" fill="yellowgreen" r="10"></circle><circle cx="12" cy="12" fill="sienna" r="5"></circle></svg>
 <span class="font-headline-sm text-xl text-primary dark:text-primary-fixed truncate">Luntian AI</span>
@@ -140,15 +140,12 @@
 </button>
 </div>
 <div class="p-6 flex-shrink-0">
-<button class="w-full flex items-center justify-center gap-2 bg-primary-container dark:bg-primary text-white py-3 px-6 rounded-xl shadow-md hover:shadow-lg transition-all active:scale-95 duration-200 font-label-md tracking-wide uppercase" id="new-chat-btn" title="New chat"><!--Add new conversation button-->
+<button class="w-full flex items-center justify-center gap-2 bg-primary text-white py-3.5 px-6 rounded-xl shadow-md hover:shadow-lg hover:bg-primary/90 transition-all active:scale-95 duration-200 font-label-md tracking-wide" id="new-chat-btn" title="New chat"><!--Add new conversation button-->
             Add new chat
         </button>
 </div>
 <ul class="history-list flex-1 overflow-y-auto px-2 py-4 space-y-2" id="chat-history"><!--Chat lists container--></ul>
-<div class="sidebar-footer p-6 border-t border-outline-variant/30 dark:border-outline/30 flex flex-col text-xs font-body-md text-on-surface-variant/70 dark:text-inverse-on-surface/70 text-center gap-1 mt-auto bg-surface-container-low dark:bg-inverse-surface">
-<i>© copyright Luntian AI 2025-2026.</i>
-<i>credits to:<mark class="bg-primary-container/20 text-primary dark:text-primary-fixed px-1 rounded">Percy Mic P. Nono</mark></i>
-</div>
+<div class="sidebar-footer p-6 border-t border-outline-variant/30 dark:border-outline/30 flex flex-col text-xs font-body-md text-on-surface-variant/70 dark:text-inverse-on-surface/70 text-center gap-1 mt-auto bg-surface-container-low dark:bg-inverse-surface"><p class="mb-1 opacity-80">© 2025 Luntian AI</p><p class="text-[10px] uppercase tracking-widest font-semibold">Created by Percy Mic P. Nono</p></div>
 </aside>
 <main class="chat-area flex-1 flex flex-col h-full relative bg-surface-bright dark:bg-[#201d40]">
 <div class="flex items-center gap-3 p-4 md:p-6 pb-0 border-b border-outline-variant/30 dark:border-outline/30 md:border-none justify-between">
@@ -168,10 +165,10 @@
 </div>
 <section class="chat-box flex-1 overflow-y-auto p-4 md:p-8 pb-32 scroll-smooth flex flex-col gap-4" id="chat-box">
 <!-- Simulated messages for visual representation of alignment -->
-<div class="message-user max-w-[85%] sm:max-w-[75%] p-4 rounded-2xl shadow-sm">
+<div class="message-user max-w-[85%] sm:max-w-[75%] p-4 rounded-2xl shadow-sm bg-primary text-white self-end">
 <p>Hello! Can you help me with a design?</p>
 </div>
-<div class="message-ai max-w-[85%] sm:max-w-[75%] p-4 rounded-2xl shadow-sm border border-outline-variant/20 dark:border-outline/20">
+<div class="message-ai max-w-[85%] sm:max-w-[75%] p-4 rounded-2xl shadow-sm bg-surface-container-high dark:bg-on-secondary-fixed border border-outline-variant/20 dark:border-outline/20">
 <p>Of course! I can help you create a beautiful design using the Serene Violet palette. What are you looking to build?</p>
 </div>
 </section><!--Chat container-->
