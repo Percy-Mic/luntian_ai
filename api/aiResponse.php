@@ -91,7 +91,7 @@ try {
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
-        "model" => "llama-3.3-70b-versatile",
+        "model" => "openai/gpt-oss-120b",
         "messages" => array_values($model_messages)
     ]));
     curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
