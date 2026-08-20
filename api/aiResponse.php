@@ -1,5 +1,7 @@
 <?php
-// api/aiResponse.php
+// Start output buffering immediately to catch rogue warnings/notices
+ob_start();
+
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
@@ -17,7 +19,7 @@ try {
     require_once __DIR__ . '/_db_connect.php';
     require_once __DIR__ . '/_chat_history.php';
 
-    // 1. Parse Inbound Body JSON
+    // Parse Input
     $raw_input = file_get_contents('php://input');
     $input = json_decode($raw_input, true) ?? $_POST;
     
@@ -25,12 +27,12 @@ try {
     $conversation_id = $input['conversation_id'] ?? null;
 
     if (empty($prompt)) {
-        http_response_code(400);
-        echo json_encode(['error' => 'Prompt text string cannot be empty.']);
+        ob_clean();
+        echo json_encode(['error' => 'Prompt text cannot be empty.']);
         exit;
     }
 
-    // 2. Validate/Create Conversation Thread
+    // Validate/Create Conversation
     if (!$conversation_id || strpos((string)$conversation_id, 'temp-') === 0 || $conversation_id === 'null') {
         $conversation_id = create_conversation('Luntian Chat Thread');
         if (!$conversation_id) {
@@ -40,10 +42,10 @@ try {
         $conversation_id = intval($conversation_id);
     }
 
-    // 3. Log Inbound User Message First
+    // Save User Prompt
     add_message($conversation_id, 'user', $prompt);
 
-    // 4. Construct System Base
+    // System Prompt
     $model_messages = [
         [
             'role' => 'system', 
@@ -51,47 +53,44 @@ try {
         ]
     ];
 
-    // 5. Load Complete Chat History from DB & Normalize Roles for Groq API
+    // Load History
     $history = get_messages_for_conversation($conversation_id);
-    
     if (is_array($history)) {
         foreach ($history as $msg) {
             $text = trim($msg['content'] ?? ($msg['message_text'] ?? ''));
             $raw_role = strtolower($msg['role'] ?? 'user');
 
-            // Normalize DB role names to valid Groq roles ('user' or 'assistant')
             $role = ($raw_role === 'assistant' || $raw_role === 'bot' || $raw_role === 'ai') 
                 ? 'assistant' 
                 : 'user';
 
             if (!empty($text)) {
-                $model_messages[] = [
-                    'role' => $role,
-                    'content' => $text
-                ];
+                $model_messages[] = ['role' => $role, 'content' => $text];
             }
         }
     }
 
     $api_key = defined('OPENAI_API_KEY') ? OPENAI_API_KEY : null;
     if (empty($api_key)) {
-        throw new Exception("Groq system API token key is missing or undefined inside config constants.");
+        throw new Exception("Groq API token key is missing or undefined inside config constants.");
     }
 
-    // 6. Send Request to Groq API
+    // Send Request to Groq API
     $ch = curl_init("https://api.groq.com/openai/v1/chat/completions");
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
-        "model" => "openai/gpt-oss-120b",",
-        "messages" => $model_messages,
-        "temperature" => 0.7
-    ]));
-    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 25);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, [
-        'Content-Type: application/json',
-        'Authorization: Bearer ' . $api_key
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_POST => true,
+        CURLOPT_POSTFIELDS => json_encode([
+            "model" => "openai/gpt-oss-120b",
+            "messages" => $model_messages,
+            "temperature" => 0.7
+        ]),
+        CURLOPT_CONNECTTIMEOUT => 10,
+        CURLOPT_TIMEOUT => 25,
+        CURLOPT_HTTPHEADER => [
+            'Content-Type: application/json',
+            'Authorization: Bearer ' . $api_key
+        ]
     ]);
 
     $response = curl_exec($ch);
@@ -107,17 +106,18 @@ try {
     $result_data = json_decode($response, true);
     $reply = $result_data['choices'][0]['message']['content'] ?? 'No response text generated.';
 
-    // 7. Log Outbound AI Reply to DB
+    // Save Assistant Response
     add_message($conversation_id, 'assistant', $reply);
 
-    // 8. Return Payload to Frontend
+    // Wipe any unexpected warnings before sending clean JSON
+    ob_clean();
     echo json_encode([
         'reply' => $reply,
         'conversation_id' => $conversation_id
     ]);
 
 } catch (Throwable $t) {
-    http_response_code(200); 
+    ob_clean();
     echo json_encode([
         'error' => true,
         'reply' => "⚠️ Engine Sync Alert: " . $t->getMessage(),
