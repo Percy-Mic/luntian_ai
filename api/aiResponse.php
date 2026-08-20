@@ -52,16 +52,24 @@ try {
         ['role' => 'system', 'content' => "You are Luntian AI, a helpful virtual assistant created by Percy Mic. Keep answers clean, conversational, and precise."]
     ];
 
-    // Load history matching table layout records
-    $history = get_messages_for_conversation($conversation_id);
-    if (is_array($history)) {
-        foreach ($history as $msg) {
-            $text = $msg['content'] ?? ($msg['message_text'] ?? '');
-            if (!empty($text)) {
-                $model_messages[] = ['role' => $msg['role'], 'content' => $text];
-            }
+    // Load history records matching table layout
+$history = get_messages_for_conversation($conversation_id);
+
+if (is_array($history)) {
+    foreach ($history as $msg) {
+        $text = $msg['message_text'] ?? ($msg['content'] ?? '');
+        $role = $msg['role'] ?? 'user';
+        if (!empty($text)) {
+            $model_messages[] = ['role' => $role, 'content' => $text];
         }
     }
+}
+
+// Ensure the latest incoming user message isn't duplicated if already saved in history
+$last_message = end($model_messages);
+if (!$last_message || $last_message['content'] !== $prompt || $last_message['role'] !== 'user') {
+    $model_messages[] = ['role' => 'user', 'content' => $prompt];
+}
 
     // Double check that the current query is appended
     if (end($model_messages)['content'] !== $prompt) {
