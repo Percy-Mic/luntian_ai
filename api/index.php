@@ -210,43 +210,7 @@
 
   </script>
 
-<style>
-
-    .material-symbols-outlined {
-
-      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-
-    }
-
-    
-
-    /* Simulate dynamic content for demo purposes based on instructions */
-
-    .message-user {
-
-        align-self: flex-end;
-
-        background-color: theme('colors.primary');
-
-        color: theme('colors.on-primary');
-
-        border-bottom-right-radius: 4px;
-
-    }
-
-    .message-ai {
-
-        align-self: flex-start;
-
-        background-color: theme('colors.surface-container-high');
-
-        color: theme('colors.on-surface');
-
-        border-bottom-left-radius: 4px;
-
-    }
-
-  </style>
+<link rel="stylesheet" type="text/css" href="/../style.css">
 
 <script src="marked.min.js"></script>
 
