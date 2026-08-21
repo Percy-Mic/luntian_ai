@@ -262,7 +262,7 @@ document.addEventListener('DOMContentLoaded', () => {
         window.speechSynthesis.cancel();
         if(stopSpeechBtn) stopSpeechBtn.style.display = 'none';
         const newId = 'temp-' + Date.now();
-        chats.unshift({ id: newId, title: `New Chat ${chats.length + 1}`, messages: [] });
+        chats.unshift({ id: newId, title: `New chat ${chats.length + 1}`, messages: [] });
         currentChatId = newId;
         loadChat(0);
     }
