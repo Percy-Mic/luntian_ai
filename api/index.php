@@ -281,10 +281,6 @@
 <button class="p-2 rounded-xl hover:bg-surface-container dark:hover:bg-on-secondary-fixed transition-colors text-primary dark:text-primary-fixed" id="theme-toggle" title="Toggle Theme"><span class="material-symbols-outlined dark:hidden text-[18px]">dark_mode</span><span class="material-symbols-outlined hidden dark:block text-[18px]">light_mode</span></button>
 
 </div>
-<div class="message-user">
-      <span class="material-symbols-outlined">navigation</span>
-  </div>
-  <div class="message-ai">Inteligent — precise, helpful, and expressive.</div>
 <section 
   id="chat-box"
   class="chat-box flex-1 overflow-y-auto p-4 md:p-8 pb-32 md:pb-20 scroll-smooth flex flex-col gap-4 h-full overflow-x-hidden"
