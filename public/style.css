@@ -118,4 +118,9 @@
   .chat-box {
     padding-bottom: 50px;
   }
+  form{
+    display: fixed;
+    bottom: 0px;
+    right: 10px
+  }
 }
