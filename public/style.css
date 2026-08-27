@@ -111,7 +111,9 @@
 }
 @media (min-width: 768px) {
   .input-wrapper {
-    bottom: 5px;
+    display: fixed;
+    bottom: 0px;
+    right: 10px
   }
   .chat-box {
     padding-bottom: 50px;
