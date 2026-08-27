@@ -109,18 +109,3 @@
     color: theme('colors.on-surface');
     border-bottom-left-radius: 4px;
 }
-@media (min-width: 768px) {
-  .input-wrapper {
-    display: fixed;
-    bottom: 0px;
-    right: 10px
-  }
-  .chat-box {
-    
-  }
-  form{
-    display: fixed;
-    bottom: 0px;
-    right: 10px
-  }
-}
