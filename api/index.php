@@ -282,7 +282,7 @@
 
 </div>
 
-<section class="chat-box flex-1 overflow-y-auto p-4 md:p-8 pb-32 md:pb-12 scroll-smooth flex flex-col gap-4 h-full overflow-x-hidden" id="chat-box">
+<section class="chat-box flex-1 overflow-y-auto p-4 md:p-8 pb-32 md:pb-50 scroll-smooth flex flex-col gap-4 h-full overflow-x-hidden" id="chat-box">
   <div class="message-user"></div>
   <div class="message-ai">Inteligent — precise, helpful, and expressive.</div>
 </section>
