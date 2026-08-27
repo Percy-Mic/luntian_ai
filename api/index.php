@@ -306,7 +306,7 @@
 
 </div>
 
-<div class="input-wrapper absolute bottom-10 left-0 right-0 p-4 md:p-6 bg-gradient-to-t from-surface-bright dark:from-[#201d40] via-surface-bright/95 dark:via-[#201d40]/95 to-transparent pt-12">
+<div class="input-wrapper absolute bottom-10 left-0 right-0 p-4 md:p-6 bg-gradient-to-t from-surface-bright dark:from-[#201d40] via-surface-bright/95 dark:via-[#201d40]/95 to-transparent pt-12" style="@media (min-width: 768px) {bottom: 0px;}">
 
 <div class="max-w-[800px] mx-auto relative">
 
